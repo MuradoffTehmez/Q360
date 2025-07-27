@@ -1,0 +1,75 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <img src="{{ profile_user.profil_sekli.url }}" class="card-img-top" alt="{{ profile_user.get_full_name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ profile_user.get_full_name }}</h5>
+                    <p class="card-text">{{ profile_user.vezife }}</p>
+                    <p class="card-text">{{ profile_user.organization_unit.name }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Profile Details</h5>
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab" aria-controls="details" aria-selected="true">Details</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="feedback-given-tab" data-bs-toggle="tab" data-bs-target="#feedback-given" type="button" role="tab" aria-controls="feedback-given" aria-selected="false">Feedback Given</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="feedback-received-tab" data-bs-toggle="tab" data-bs-target="#feedback-received" type="button" role="tab" aria-controls="feedback-received" aria-selected="false">Feedback Received</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
+                            <p><strong>Skills:</strong> {{ profile_user.skill_list|default_if_none:"" }}</p>
+                            <p><strong>Interests:</strong> {{ profile_user.interests|default_if_none:"" }}</p>
+                            <p><strong>Work Experience:</strong> {{ profile_user.work_experience|default_if_none:"" }}</p>
+                            {% if profile_user.social_links %}
+                            <p><strong>Social Links:</strong></p>
+                            <ul>
+                                {% for platform, link in profile_user.social_links.items %}
+                                <li><a href="{{ link }}" target="_blank">{{ platform|title }}</a></li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                        <div class="tab-pane fade" id="feedback-given" role="tabpanel" aria-labelledby="feedback-given-tab">
+                            {% for feedback in feedback_given %}
+                            <div class="card my-2">
+                                <div class="card-body">
+                                    <p class="card-text">{{ feedback.message }}</p>
+                                    <small class="text-muted">To: {{ feedback.to_user.get_full_name }} on {{ feedback.created_at }}</small>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <p>No feedback given yet.</p>
+                            {% endfor %}
+                        </div>
+                        <div class="tab-pane fade" id="feedback-received" role="tabpanel" aria-labelledby="feedback-received-tab">
+                            {% for feedback in feedback_received %}
+                            <div class="card my-2">
+                                <div class="card-body">
+                                    <p class="card-text">{{ feedback.message }}</p>
+                                    <small class="text-muted">From: {% if feedback.is_anonymous %}Anonymous{% else %}{{ feedback.from_user.get_full_name }}{% endif %} on {{ feedback.created_at }}</small>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <p>No feedback received yet.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
