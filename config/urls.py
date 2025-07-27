@@ -13,7 +13,6 @@ i18n_urlpatterns = i18n_patterns(
     path('accounts/login/', CustomLoginView.as_view(), name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', include('core.urls')),
-    prefix_default_language=True,
 )
 
 # Dilə həssas olmayan URL-lər

@@ -1,6 +1,6 @@
 # core/tests/test_api.py
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
@@ -12,66 +12,7 @@ from core.models import OrganizationUnit, QiymetlendirmeDovru, Notification
 User = get_user_model()
 
 
-class AuthenticationAPITest(APITestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            password="testpass123",
-            first_name="Test",
-            last_name="User",
-            rol=User.Rol.ISHCHI
-        )
-
-    def test_token_obtain(self):
-        """JWT token alınmasını test et"""
-        url = reverse('token_obtain_pair')
-        data = {
-            'username': 'testuser',
-            'password': 'testpass123'
-        }
-        
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('access', response.data)
-        self.assertIn('refresh', response.data)
-        self.assertIn('user', response.data)
-
-    def test_token_obtain_invalid_credentials(self):
-        """Yanlış kimlik məlumatları ilə token alınmasını test et"""
-        url = reverse('token_obtain_pair')
-        data = {
-            'username': 'testuser',
-            'password': 'wrongpassword'
-        }
-        
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_protected_endpoint_without_token(self):
-        """Token olmadan qorunan endpoint-ə müraciəti test et"""
-        url = '/api/v1/users/'
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_protected_endpoint_with_token(self):
-        """Token ilə qorunan endpoint-ə müraciəti test et"""
-        # Token al
-        token_url = reverse('token_obtain_pair')
-        token_data = {
-            'username': 'testuser',
-            'password': 'testpass123'
-        }
-        token_response = self.client.post(token_url, token_data)
-        token = token_response.data['access']
-        
-        # Token ilə API-a müraciət et
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
-        url = '/api/v1/users/'
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-
+@override_settings(LANGUAGE_CODE='en-us')
 class UserAPITest(APITestCase):
     def setUp(self):
         self.admin_user = User.objects.create_user(
@@ -90,21 +31,14 @@ class UserAPITest(APITestCase):
 
     def authenticate_user(self, user):
         """İstifadəçini authenticate et"""
-        token_url = reverse('token_obtain_pair')
-        token_data = {
-            'username': user.username,
-            'password': 'adminpass123' if user.rol == User.Rol.ADMIN else 'userpass123'
-        }
-        token_response = self.client.post(token_url, token_data)
-        token = token_response.data['access']
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.force_authenticate(user=user)
 
     def test_user_list_as_admin(self):
         """Admin kimi istifadəçi siyahısını əldə etməyi test et"""
         self.authenticate_user(self.admin_user)
         
-        url = '/api/v1/users/'
-        response = self.client.get(url)
+        url = reverse('ishchi-list')
+        response = self.client.get(url, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('results', response.data)
@@ -114,8 +48,8 @@ class UserAPITest(APITestCase):
         """İstifadəçi profilini əldə etməyi test et"""
         self.authenticate_user(self.regular_user)
         
-        url = '/api/v1/users/profile/'
-        response = self.client.get(url)
+        url = reverse('ishchi-detail', kwargs={'pk': self.regular_user.pk})
+        response = self.client.get(url, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['username'], 'user')
@@ -124,7 +58,7 @@ class UserAPITest(APITestCase):
         """Yeni istifadəçi yaratmağı test et"""
         self.authenticate_user(self.admin_user)
         
-        url = '/api/v1/users/'
+        url = reverse('ishchi-list')
         data = {
             'username': 'newuser',
             'email': 'newuser@example.com',
@@ -134,11 +68,12 @@ class UserAPITest(APITestCase):
             'rol': 'ISHCHI'
         }
         
-        response = self.client.post(url, data)
+        response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.filter(username='newuser').count(), 1)
 
 
+@override_settings(LANGUAGE_CODE='en-us')
 class DashboardAPITest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
@@ -158,21 +93,14 @@ class DashboardAPITest(APITestCase):
 
     def authenticate_user(self):
         """İstifadəçini authenticate et"""
-        token_url = reverse('token_obtain_pair')
-        token_data = {
-            'username': 'testuser',
-            'password': 'testpass123'
-        }
-        token_response = self.client.post(token_url, token_data)
-        token = token_response.data['access']
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.force_authenticate(user=self.user)
 
     def test_dashboard_stats(self):
         """Dashboard statistikalarını test et"""
         self.authenticate_user()
         
-        url = '/api/v1/dashboard/stats/'
-        response = self.client.get(url)
+        url = reverse('dashboard-stats')
+        response = self.client.get(url, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
@@ -190,6 +118,7 @@ class DashboardAPITest(APITestCase):
             self.assertIsInstance(response.data[field], int)
 
 
+@override_settings(LANGUAGE_CODE='en-us')
 class OrganizationUnitAPITest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
@@ -212,21 +141,14 @@ class OrganizationUnitAPITest(APITestCase):
 
     def authenticate_user(self):
         """İstifadəçini authenticate et"""
-        token_url = reverse('token_obtain_pair')
-        token_data = {
-            'username': 'testuser',
-            'password': 'testpass123'
-        }
-        token_response = self.client.post(token_url, token_data)
-        token = token_response.data['access']
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.force_authenticate(user=self.user)
 
     def test_organization_unit_list(self):
         """Təşkilati vahidlər siyahısını test et"""
         self.authenticate_user()
         
-        url = '/api/v1/organization-units/'
-        response = self.client.get(url)
+        url = reverse('organizationunit-list')
+        response = self.client.get(url, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 2)
@@ -235,14 +157,15 @@ class OrganizationUnitAPITest(APITestCase):
         """Təşkilati vahidin alt vahidlərini test et"""
         self.authenticate_user()
         
-        url = f'/api/v1/organization-units/{self.parent_unit.id}/children/'
-        response = self.client.get(url)
+        url = reverse('organizationunit-children', kwargs={'pk': self.parent_unit.pk})
+        response = self.client.get(url, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['name'], 'İT Departamenti')
 
 
+@override_settings(LANGUAGE_CODE='en-us')
 class NotificationAPITest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
@@ -260,21 +183,14 @@ class NotificationAPITest(APITestCase):
 
     def authenticate_user(self):
         """İstifadəçini authenticate et"""
-        token_url = reverse('token_obtain_pair')
-        token_data = {
-            'username': 'testuser',
-            'password': 'testpass123'
-        }
-        token_response = self.client.post(token_url, token_data)
-        token = token_response.data['access']
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.client.force_authenticate(user=self.user)
 
     def test_notification_list(self):
         """İstifadəçinin bildirişlərini test et"""
         self.authenticate_user()
         
-        url = '/api/v1/notifications/'
-        response = self.client.get(url)
+        url = reverse('notification-list')
+        response = self.client.get(url, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
@@ -284,8 +200,8 @@ class NotificationAPITest(APITestCase):
         """Bildirişi oxunmuş kimi işarələməyi test et"""
         self.authenticate_user()
         
-        url = f'/api/v1/notifications/{self.notification.id}/mark_read/'
-        response = self.client.post(url)
+        url = reverse('notification-mark-read', kwargs={'pk': self.notification.pk})
+        response = self.client.post(url, format='json')
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
 from simple_history.models import HistoricalRecords
 
 # AI Risk Detection Models will be added directly to avoid circular imports
@@ -77,10 +77,11 @@ class Ishchi(AbstractUser):
         default="profil_sekilleri/default.png",
         verbose_name="Profil Şəkli",
     )
-    skill_list = models.TextField(blank=True, null=True, verbose_name="Skills")
-    interests = models.TextField(blank=True, null=True, verbose_name="Interests")
-    social_links = models.JSONField(blank=True, null=True, verbose_name="Social Links")
-    work_experience = models.TextField(blank=True, null=True, verbose_name="Work Experience")
+    skills = models.TextField(blank=True, null=True, verbose_name="Bacarıqlar")
+    interests = models.TextField(blank=True, null=True, verbose_name="Maraqlar")
+    social_links = models.JSONField(blank=True, null=True, verbose_name="Sosial Linklər")
+    work_experience = models.TextField(blank=True, null=True, verbose_name="İş Təcrübəsi")
+
 
     history = HistoricalRecords()
 
@@ -1625,43 +1626,6 @@ class IdeaComment(models.Model):
     history = HistoricalRecords()
 
 
-class OrganizationalFeedback(models.Model):
-    target_content_type = models.ForeignKey(
-        'contenttypes.ContentType',
-        on_delete=models.CASCADE,
-        limit_choices_to={
-            'model__in': (
-                'organizationunit'
-            )
-        }
-    )
-    target_object_id = models.PositiveIntegerField()
-    target_object = GenericForeignKey('target_content_type', 'target_object_id')
-    author = models.ForeignKey(
-        'Ishchi',
-        on_delete=models.CASCADE,
-        related_name='given_org_feedback'
-    )
-    parent = models.ForeignKey(
-        'self',
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name='replies'
-    )
-    content = models.TextField()
-    is_anonymous = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    history = HistoricalRecords()
-
-    class Meta:
-        ordering = ['created_at']
-
-    def __str__(self):
-        return f'Feedback by {self.author} on {self.target_object}'
-
-
 # === LMS (LEARNING MANAGEMENT SYSTEM) MODELS ===
 
 class TrainingCategory(models.Model):
@@ -1917,7 +1881,7 @@ class EmployeeSkill(models.Model):
     
     employee = models.ForeignKey(
         Ishchi, on_delete=models.CASCADE,
-        related_name="skills", verbose_name="İşçi"
+        related_name="employee_skills", verbose_name="İşçi"
     )
     skill = models.ForeignKey(
         Skill, on_delete=models.CASCADE,
@@ -2111,3 +2075,26 @@ class LearningPathProgram(models.Model):
     history = HistoricalRecords()
 
 
+class OrganizationalFeedback(models.Model):
+    target_content_type = models.ForeignKey(
+        'contenttypes.ContentType', on_delete=models.CASCADE
+    )
+    target_object_id = models.PositiveIntegerField()
+    target_object = GenericForeignKey('target_content_type', 'target_object_id')
+    author = models.ForeignKey(
+        'Ishchi', on_delete=models.CASCADE, related_name='given_org_feedback'
+    )
+    parent = models.ForeignKey(
+        'self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies'
+    )
+    content = models.TextField()
+    is_anonymous = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Təşkilati Geri Bildirim"
+        verbose_name_plural = "Təşkilati Geri Bildirimlər"
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Feedback by {self.author} on {self.target_object}"
