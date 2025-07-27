@@ -570,25 +570,25 @@ class QeydiyyatFormu(UserCreationForm):
         )
 
 
+from .models import UserProfile
 class ProfileUpdateForm(forms.ModelForm):
     """İstifadəçi profil yeniləmə forması"""
     
     class Meta:
-        model = Ishchi
+        model = UserProfile
         fields = [
-            'first_name', 'last_name', 'email', 'elaqe_nomresi', 
-            'dogum_tarixi', 'profil_sekli'
+            'profil_sekli', 'bio', 'skills', 'interests', 'social_links', 'work_experience'
         ]
         widgets = {
-            'first_name': ModernTextInput(placeholder="Adınız"),
-            'last_name': ModernTextInput(placeholder="Soyadınız"),
-            'email': ModernEmailInput(),
-            'elaqe_nomresi': ModernTextInput(placeholder="+994 XX XXX XX XX"),
-            'dogum_tarixi': ModernDateInput(),
             'profil_sekli': forms.FileInput(attrs={
                 'class': 'form-control',
                 'accept': 'image/*'
-            })
+            }),
+            'bio': ModernTextarea(placeholder="Bio"),
+            'skills': ModernTextarea(placeholder="Skills"),
+            'interests': ModernTextarea(placeholder="Interests"),
+            'social_links': ModernTextInput(placeholder="Social Links"),
+            'work_experience': ModernTextarea(placeholder="Work Experience"),
         }
     
     def __init__(self, *args, **kwargs):

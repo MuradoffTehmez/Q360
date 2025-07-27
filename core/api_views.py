@@ -1068,6 +1068,31 @@ class StatisticalAnomalyViewSet(viewsets.ViewSet):
 
 # === STRATEJİ KADR PLANLAŞDIRMASI API VİEWS ===
 
+from .models import OrganizationalFeedback
+from .serializers import OrganizationalFeedbackSerializer
+from .api_permissions import IsAuthorOrReadOnly
+
+class OrganizationalFeedbackViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for creating, reading, updating, and deleting Organizational Feedback.
+    """
+    serializer_class = OrganizationalFeedbackSerializer
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
+
+    def get_queryset(self):
+        """
+        This queryset is filtered to only return top-level feedback (not replies).
+        Replies will be nested inside their parents by the serializer.
+        """
+        return OrganizationalFeedback.objects.filter(parent=None)
+
+    def perform_create(self, serializer):
+        """
+        This hook is called when a new object is created. We use it to automatically
+        set the 'author' to the currently logged-in user.
+        """
+        serializer.save(author=self.request.user)
+
 class StrategicHRPlanningViewSet(viewsets.ViewSet):
     """Strateji HR planlaşdırma əməliyyatları"""
     permission_classes = [IsAuthenticated]

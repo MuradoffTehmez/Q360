@@ -51,6 +51,7 @@ class OrganizationUnit(models.Model):
         return self.ishchiler.count()
 
 
+from django.utils.translation import gettext_lazy as _
 # --- Genişləndirilmiş İstifadəçi Modeli ---
 class Ishchi(AbstractUser):
     class Rol(models.TextChoices):
@@ -72,21 +73,29 @@ class Ishchi(AbstractUser):
         max_length=20, blank=True, null=True, verbose_name="Əlaqə Nömrəsi"
     )
     dogum_tarixi = models.DateField(blank=True, null=True, verbose_name="Doğum Tarixi")
-    profil_sekli = models.ImageField(
-        upload_to="profil_sekilleri/",
-        default="profil_sekilleri/default.png",
-        verbose_name="Profil Şəkli",
-    )
-    skills = models.TextField(blank=True, null=True, verbose_name="Bacarıqlar")
-    interests = models.TextField(blank=True, null=True, verbose_name="Maraqlar")
-    social_links = models.JSONField(blank=True, null=True, verbose_name="Sosial Linklər")
-    work_experience = models.TextField(blank=True, null=True, verbose_name="İş Təcrübəsi")
 
 
     history = HistoricalRecords()
 
     def __str__(self):
         return self.get_full_name() or self.username
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(Ishchi, on_delete=models.CASCADE, related_name='userprofile')
+    profil_sekli = models.ImageField(
+        upload_to="profil_sekilleri/",
+        default="profil_sekilleri/default.png",
+        verbose_name="Profil Şəkli",
+    )
+    bio = models.TextField(_("Bio"), blank=True, null=True)
+    skills = models.TextField(_("Skills"), blank=True, null=True)
+    interests = models.TextField(_("Interests"), blank=True, null=True)
+    social_links = models.JSONField(_("Social Links"), blank=True, null=True, help_text="e.g. {'linkedin': 'url', 'twitter': 'url'}")
+    work_experience = models.TextField(_("Work Experience"), blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.username} Profile"
 
 
 # --- Sual Hovuzu Modelləri ---
@@ -2076,25 +2085,29 @@ class LearningPathProgram(models.Model):
 
 
 class OrganizationalFeedback(models.Model):
-    target_content_type = models.ForeignKey(
-        'contenttypes.ContentType', on_delete=models.CASCADE
-    )
-    target_object_id = models.PositiveIntegerField()
+    # The GenericForeignKey allows this model to be linked to ANY other model
+    # (Sobe, Departament, etc.) without creating a hard dependency.
+    target_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, verbose_name=_("Target Type"))
+    target_object_id = models.PositiveIntegerField(verbose_name=_("Target ID"))
     target_object = GenericForeignKey('target_content_type', 'target_object_id')
-    author = models.ForeignKey(
-        'Ishchi', on_delete=models.CASCADE, related_name='given_org_feedback'
-    )
-    parent = models.ForeignKey(
-        'self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies'
-    )
-    content = models.TextField()
-    is_anonymous = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+
+    # 'author' links to the user who wrote the feedback. It's set automatically.
+    author = models.ForeignKey('Ishchi', on_delete=models.CASCADE, related_name='given_org_feedback', verbose_name=_("Author"))
+
+    # 'parent' allows for threaded comments (replies to other feedback).
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies', verbose_name=_("Parent Feedback"))
+
+    content = models.TextField(verbose_name=_("Content"))
+
+    # 'is_anonymous' is a critical flag that the API will use to hide the author's identity.
+    is_anonymous = models.BooleanField(default=False, verbose_name=_("Is Anonymous"))
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Creation Date"))
 
     class Meta:
-        verbose_name = "Təşkilati Geri Bildirim"
-        verbose_name_plural = "Təşkilati Geri Bildirimlər"
-        ordering = ['created_at']
+        verbose_name = _("Organizational Feedback")
+        verbose_name_plural = _("Organizational Feedbacks")
+        ordering = ['-created_at']
 
     def __str__(self):
-        return f"Feedback by {self.author} on {self.target_object}"
+        return f"Feedback for {self.target_object} by {self.author.username}"

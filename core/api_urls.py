@@ -13,11 +13,12 @@ from .api_views import (
     PrivateNoteViewSet, IdeaCategoryViewSet, IdeaViewSet, DashboardViewSet,
     RiskFlagViewSet, EmployeeRiskAnalysisViewSet, PsychologicalRiskSurveyViewSet,
     PsychologicalRiskResponseViewSet, AIRiskDetectionViewSet, StatisticalAnomalyViewSet,
-    StrategicHRPlanningViewSet, TranslationAPIView
+    StrategicHRPlanningViewSet, TranslationAPIView, OrganizationalFeedbackViewSet
 )
 
 # Router yaradılması
 router = DefaultRouter()
+router.register(r'organizational-feedback', OrganizationalFeedbackViewSet, basename='organizational-feedback')
 
 # ViewSet-ləri router-a qoşmaq
 router.register(r'users', IshchiViewSet)
