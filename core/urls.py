@@ -10,8 +10,12 @@ from . import dashboard_views
 from . import ai_risk_views
 from . import training_views
 from . import performance_views
+from .views import user_profile, feedback as feedback_views
 
 urlpatterns = [
+    path('profile/<int:pk>/', user_profile.UserProfileDetailView.as_view(), name='user_profile_detail'),
+    path('organizational-unit/<int:pk>/', feedback_views.OrganizationalUnitDetailView.as_view(), name='organizational_unit_detail'),
+    path('feedback/post/', feedback_views.post_feedback, name='post_feedback'),
     path("", views.dashboard, name="dashboard"),
     path("qeydiyyat/", views.qeydiyyat_sehifesi, name="qeydiyyat"),
     path(
