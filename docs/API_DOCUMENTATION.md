@@ -1,6 +1,7 @@
 # Q360 Performance Management System - API Documentation
 
 ## Table of Contents
+
 - [Overview](#overview)
 - [Authentication](#authentication)
 - [Base URL](#base-url)
@@ -17,11 +18,13 @@
 The Q360 Performance Management System API provides RESTful endpoints for managing employee evaluations, development plans, notifications, and analytics. The API follows REST principles and returns JSON responses.
 
 ### API Version
+
 - **Current Version**: v1
 - **Base Path**: `/api/v1/`
 - **Documentation**: Available at `/api/docs/` (Swagger UI) and `/api/redoc/` (ReDoc)
 
 ### Features
+
 - JWT-based authentication
 - Role-based access control (RBAC)
 - Comprehensive error handling
@@ -33,9 +36,11 @@ The Q360 Performance Management System API provides RESTful endpoints for managi
 ## Authentication
 
 ### JWT Authentication
+
 The API uses JSON Web Tokens (JWT) for authentication. Tokens must be included in the `Authorization` header.
 
 #### Obtain Token
+
 ```http
 POST /api/v1/auth/login/
 Content-Type: application/json
@@ -47,6 +52,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
     "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
@@ -62,6 +68,7 @@ Content-Type: application/json
 ```
 
 #### Refresh Token
+
 ```http
 POST /api/v1/auth/refresh/
 Content-Type: application/json
@@ -72,12 +79,15 @@ Content-Type: application/json
 ```
 
 #### Using Tokens
+
 Include the access token in all API requests:
+
 ```http
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 ```
 
 ### Token Lifecycle
+
 - **Access Token**: 1 hour
 - **Refresh Token**: 7 days
 - **Auto-rotation**: Enabled
@@ -85,11 +95,13 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 ## Base URL
 
 ### Development
+
 ```
 http://localhost:8000/api/v1/
 ```
 
 ### Production
+
 ```
 https://api.q360.company.com/api/v1/
 ```
@@ -97,6 +109,7 @@ https://api.q360.company.com/api/v1/
 ## Common Response Format
 
 ### Success Response
+
 ```json
 {
     "success": true,
@@ -111,6 +124,7 @@ https://api.q360.company.com/api/v1/
 ```
 
 ### Paginated Response
+
 ```json
 {
     "success": true,
@@ -133,6 +147,7 @@ https://api.q360.company.com/api/v1/
 ## Error Handling
 
 ### Error Response Format
+
 ```json
 {
     "success": false,
@@ -192,11 +207,13 @@ X-RateLimit-Reset: 1642248000
 ### Authentication Endpoints
 
 #### Login
+
 ```http
 POST /api/v1/auth/login/
 ```
 
 **Request:**
+
 ```json
 {
     "username": "user@example.com",
@@ -205,6 +222,7 @@ POST /api/v1/auth/login/
 ```
 
 **Response (200):**
+
 ```json
 {
     "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
@@ -226,12 +244,14 @@ POST /api/v1/auth/login/
 ### User Management
 
 #### List Users
+
 ```http
 GET /api/v1/users/
 Authorization: Bearer {token}
 ```
 
 **Query Parameters:**
+
 - `page` (integer): Page number
 - `page_size` (integer): Items per page (max 100)
 - `search` (string): Search by name or email
@@ -239,6 +259,7 @@ Authorization: Bearer {token}
 - `organization_unit` (integer): Filter by organization unit
 
 **Response (200):**
+
 ```json
 {
     "count": 150,
@@ -264,12 +285,14 @@ Authorization: Bearer {token}
 ```
 
 #### Get User Profile
+
 ```http
 GET /api/v1/users/profile/
 Authorization: Bearer {token}
 ```
 
 **Response (200):**
+
 ```json
 {
     "id": 1,
@@ -293,6 +316,7 @@ Authorization: Bearer {token}
 ```
 
 #### Create User
+
 ```http
 POST /api/v1/users/
 Authorization: Bearer {token}
@@ -302,6 +326,7 @@ Content-Type: application/json
 **Required Permissions:** `ADMIN` or `SUPERADMIN`
 
 **Request:**
+
 ```json
 {
     "username": "jane.smith",
@@ -317,6 +342,7 @@ Content-Type: application/json
 ```
 
 **Response (201):**
+
 ```json
 {
     "id": 25,
@@ -336,12 +362,14 @@ Content-Type: application/json
 ### Organization Units
 
 #### List Organization Units
+
 ```http
 GET /api/v1/organization-units/
 Authorization: Bearer {token}
 ```
 
 **Response (200):**
+
 ```json
 {
     "count": 15,
@@ -369,12 +397,14 @@ Authorization: Bearer {token}
 ```
 
 #### Get Organization Unit Children
+
 ```http
 GET /api/v1/organization-units/{id}/children/
 Authorization: Bearer {token}
 ```
 
 **Response (200):**
+
 ```json
 [
     {
@@ -397,18 +427,21 @@ Authorization: Bearer {token}
 ### Evaluations
 
 #### List Evaluations
+
 ```http
 GET /api/v1/evaluations/
 Authorization: Bearer {token}
 ```
 
 **Query Parameters:**
+
 - `cycle` (integer): Filter by evaluation cycle
 - `status` (string): Filter by status (`PENDING`, `COMPLETED`)
 - `evaluator` (integer): Filter by evaluator ID
 - `employee` (integer): Filter by employee ID
 
 **Response (200):**
+
 ```json
 {
     "count": 45,
@@ -441,12 +474,14 @@ Authorization: Bearer {token}
 ```
 
 #### Get Evaluation Details
+
 ```http
 GET /api/v1/evaluations/{id}/
 Authorization: Bearer {token}
 ```
 
 **Response (200):**
+
 ```json
 {
     "id": 1,
@@ -486,6 +521,7 @@ Authorization: Bearer {token}
 ```
 
 #### Submit Evaluation
+
 ```http
 POST /api/v1/evaluations/{id}/submit/
 Authorization: Bearer {token}
@@ -493,6 +529,7 @@ Content-Type: application/json
 ```
 
 **Request:**
+
 ```json
 {
     "answers": [
@@ -511,6 +548,7 @@ Content-Type: application/json
 ```
 
 **Response (200):**
+
 ```json
 {
     "id": 1,
@@ -524,12 +562,14 @@ Content-Type: application/json
 ### Development Plans
 
 #### List Development Plans
+
 ```http
 GET /api/v1/development-plans/
 Authorization: Bearer {token}
 ```
 
 **Response (200):**
+
 ```json
 {
     "count": 12,
@@ -554,6 +594,7 @@ Authorization: Bearer {token}
 ```
 
 #### Create Development Plan
+
 ```http
 POST /api/v1/development-plans/
 Authorization: Bearer {token}
@@ -563,6 +604,7 @@ Content-Type: application/json
 **Required Permissions:** `MANAGER`, `ADMIN`, or `SUPERADMIN`
 
 **Request:**
+
 ```json
 {
     "employee": 5,
@@ -583,6 +625,7 @@ Content-Type: application/json
 ```
 
 **Response (201):**
+
 ```json
 {
     "id": 15,
@@ -611,17 +654,20 @@ Content-Type: application/json
 ### Notifications
 
 #### List Notifications
+
 ```http
 GET /api/v1/notifications/
 Authorization: Bearer {token}
 ```
 
 **Query Parameters:**
+
 - `is_read` (boolean): Filter by read status
 - `notification_type` (string): Filter by type
 - `priority` (string): Filter by priority
 
 **Response (200):**
+
 ```json
 {
     "count": 25,
@@ -642,12 +688,14 @@ Authorization: Bearer {token}
 ```
 
 #### Mark Notification as Read
+
 ```http
 POST /api/v1/notifications/{id}/mark_read/
 Authorization: Bearer {token}
 ```
 
 **Response (200):**
+
 ```json
 {
     "id": 1,
@@ -659,12 +707,14 @@ Authorization: Bearer {token}
 ### Dashboard Analytics
 
 #### Get Dashboard Statistics
+
 ```http
 GET /api/v1/dashboard/stats/
 Authorization: Bearer {token}
 ```
 
 **Response (200):**
+
 ```json
 {
     "personal": {
@@ -692,6 +742,7 @@ Authorization: Bearer {token}
 ### AI Risk Detection
 
 #### Get Risk Analysis
+
 ```http
 GET /api/v1/ai-risk/analysis/
 Authorization: Bearer {token}
@@ -700,6 +751,7 @@ Authorization: Bearer {token}
 **Required Permissions:** `MANAGER`, `ADMIN`, or `SUPERADMIN`
 
 **Response (200):**
+
 ```json
 {
     "summary": {
@@ -730,6 +782,7 @@ Authorization: Bearer {token}
 ```
 
 #### Run Risk Analysis
+
 ```http
 POST /api/v1/ai-risk/analyze/
 Authorization: Bearer {token}
@@ -737,6 +790,7 @@ Content-Type: application/json
 ```
 
 **Request:**
+
 ```json
 {
     "cycle_id": 1,
@@ -746,6 +800,7 @@ Content-Type: application/json
 ```
 
 **Response (202):**
+
 ```json
 {
     "task_id": "abc123-def456-ghi789",
@@ -758,6 +813,7 @@ Content-Type: application/json
 ### File Upload
 
 #### Upload Profile Image
+
 ```http
 POST /api/v1/users/profile/upload-image/
 Authorization: Bearer {token}
@@ -765,6 +821,7 @@ Content-Type: multipart/form-data
 ```
 
 **Request:**
+
 ```
 Content-Disposition: form-data; name="image"; filename="profile.jpg"
 Content-Type: image/jpeg
@@ -773,6 +830,7 @@ Content-Type: image/jpeg
 ```
 
 **Response (200):**
+
 ```json
 {
     "profile_image": "http://api.example.com/media/profiles/john_doe_abc123.jpg",
@@ -783,6 +841,7 @@ Content-Type: image/jpeg
 ### Feedback System
 
 #### Submit Quick Feedback
+
 ```http
 POST /api/v1/quick-feedback/
 Authorization: Bearer {token}
@@ -790,6 +849,7 @@ Content-Type: application/json
 ```
 
 **Request:**
+
 ```json
 {
     "to_user": 5,
@@ -804,6 +864,7 @@ Content-Type: application/json
 ```
 
 **Response (201):**
+
 ```json
 {
     "id": 15,
@@ -831,10 +892,13 @@ Content-Type: application/json
 ## WebSocket Events
 
 ### Real-time Notifications
+
 Connect to: `ws://localhost:8000/ws/notifications/`
 
 #### Authentication
+
 Send JWT token after connection:
+
 ```json
 {
     "type": "auth",
@@ -843,6 +907,7 @@ Send JWT token after connection:
 ```
 
 #### Notification Event
+
 ```json
 {
     "type": "notification",
@@ -860,6 +925,7 @@ Send JWT token after connection:
 ## SDK Examples
 
 ### JavaScript/TypeScript
+
 ```typescript
 import axios from 'axios';
 
@@ -910,6 +976,7 @@ const profile = await api.getProfile();
 ```
 
 ### Python
+
 ```python
 import requests
 from typing import Optional, Dict, Any
@@ -958,6 +1025,7 @@ profile = api.get_profile()
 ## Error Examples
 
 ### Validation Error (422)
+
 ```json
 {
     "success": false,
@@ -974,6 +1042,7 @@ profile = api.get_profile()
 ```
 
 ### Permission Denied (403)
+
 ```json
 {
     "success": false,
@@ -990,6 +1059,7 @@ profile = api.get_profile()
 ```
 
 ### Rate Limit Exceeded (429)
+
 ```json
 {
     "success": false,
