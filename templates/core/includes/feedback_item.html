@@ -1,0 +1,42 @@
+{% load i18n %}
+<div class="card mb-2" id="feedback-{{ feedback_item.id }}">
+    <div class="card-body">
+        <p class="card-text">{{ feedback_item.content }}</p>
+        <footer class="blockquote-footer">
+            {% if feedback_item.is_anonymous %}
+                {% trans "Anonymous User" %}
+            {% else %}
+                <a href="{% url 'user_profile_detail' pk=feedback_item.author.pk %}">{{ feedback_item.author.get_full_name }}</a>
+            {% endif %}
+            <small class="text-muted">{{ feedback_item.created_at|date:"Y-m-d H:i" }}</small>
+        </footer>
+
+        <button class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#reply-form-{{ feedback_item.id }}" aria-expanded="false" aria-controls="reply-form-{{ feedback_item.id }}">
+            {% trans "Reply" %}
+        </button>
+
+        <div class="collapse mt-3" id="reply-form-{{ feedback_item.id }}">
+            <form class="reply-form">
+                <input type="hidden" name="unit_id" value="{{ unit.id }}">
+                <input type="hidden" name="unit_type" value="{{ unit.type|lower }}">
+                <input type="hidden" name="parent_id" value="{{ feedback_item.id }}">
+                <div class="mb-3">
+                    <textarea class="form-control" name="content" rows="2" required></textarea>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" name="is_anonymous" id="is_anonymous_reply_{{ feedback_item.id }}">
+                    <label class="form-check-label" for="is_anonymous_reply_{{ feedback_item.id }}">
+                        {% trans "Post as Anonymous" %}
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary">{% trans "Submit Reply" %}</button>
+            </form>
+        </div>
+
+        <div class="ms-4 mt-2">
+            {% for reply in feedback_item.replies.all %}
+                {% include 'core/includes/feedback_item.html' with feedback_item=reply unit=unit %}
+            {% endfor %}
+        </div>
+    </div>
+</div>

@@ -1,5 +1,6 @@
 from django.views.generic import DetailView
-from ..models import Ishchi, QuickFeedback
+from ..models import Ishchi, OrganizationalFeedback, QuickFeedback
+
 
 class UserProfileDetailView(DetailView):
     model = Ishchi
@@ -10,10 +11,10 @@ class UserProfileDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         user = self.get_object()
 
-        # Get feedback given by the user
-        context['feedback_given'] = QuickFeedback.objects.filter(from_user=user).order_by('-created_at')
+        # Feedback given by the user
+        context['feedback_given'] = OrganizationalFeedback.objects.filter(author=user)
 
-        # Get feedback received by the user
-        context['feedback_received'] = QuickFeedback.objects.filter(to_user=user).order_by('-created_at')
+        # Feedback received by the user (assuming QuickFeedback is the model for direct user feedback)
+        context['feedback_received'] = QuickFeedback.objects.filter(to_user=user)
 
         return context

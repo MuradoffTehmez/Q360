@@ -1,0 +1,126 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ unit.name }} - {% trans "Feedback" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ unit.name }}</h1>
+    <hr>
+
+    <div id="feedback-section">
+        {% for item in feedback %}
+            {% include 'core/includes/feedback_item.html' with feedback_item=item unit=unit %}
+        {% empty %}
+            <p>{% trans "No feedback yet." %}</p>
+        {% endfor %}
+    </div>
+
+    <hr>
+
+    <h4>{% trans "Post Feedback" %}</h4>
+    <form id="feedback-form">
+        {% csrf_token %}
+        <input type="hidden" name="unit_id" value="{{ unit.id }}">
+        <input type="hidden" name="unit_type" value="{{ unit.type }}">
+        <div class="mb-3">
+            <textarea class="form-control" name="content" rows="3" required></textarea>
+        </div>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="is_anonymous" id="is_anonymous">
+            <label class="form-check-label" for="is_anonymous">
+                {% trans "Post as Anonymous" %}
+            </label>
+        </div>
+        <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    document.getElementById('feedback-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+
+        fetch("{% url 'post_organizational_feedback' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                const feedbackSection = document.getElementById('feedback-section');
+                const newFeedback = document.createElement('div');
+                newFeedback.innerHTML = `
+                    <div class="card mb-2" id="feedback-${data.feedback.id}">
+                        <div class="card-body">
+                            <p class="card-text">${data.feedback.content}</p>
+                            <footer class="blockquote-footer">
+                                ${data.feedback.is_anonymous ? '{% trans "Anonymous User" %}' : `<a href="${data.feedback.author_profile_url}">${data.feedback.author}</a>`}
+                                <small class="text-muted">${data.feedback.created_at}</small>
+                            </footer>
+                        </div>
+                    </div>
+                `;
+                feedbackSection.prepend(newFeedback);
+                form.reset();
+            } else {
+                alert(data.message);
+            }
+        });
+    });
+
+    document.querySelectorAll('.reply-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            fetch("{% url 'post_organizational_feedback' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    const parentFeedback = form.closest('.card-body');
+                    const repliesContainer = parentFeedback.querySelector('.ms-4');
+                    const newReply = document.createElement('div');
+                    newReply.innerHTML = `
+                        <div class="card mb-2" id="feedback-${data.feedback.id}">
+                            <div class="card-body">
+                                <p class="card-text">${data.feedback.content}</p>
+                                <footer class="blockquote-footer">
+                                    ${data.feedback.is_anonymous ? '{% trans "Anonymous User" %}' : `<a href="${data.feedback.author_profile_url}">${data.feedback.author}</a>`}
+                                    <small class="text-muted">${data.feedback.created_at}</small>
+                                </footer>
+                            </div>
+                        </div>
+                    `;
+                    repliesContainer.prepend(newReply);
+                    form.reset();
+                    var collapseElement = document.getElementById('reply-form-' + formData.get('parent_id'));
+                    var collapse = new bootstrap.Collapse(collapseElement, {
+                        toggle: false
+                    });
+                    collapse.hide();
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
