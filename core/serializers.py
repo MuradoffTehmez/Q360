@@ -32,17 +32,27 @@ class OrganizationUnitSerializer(serializers.ModelSerializer):
 
 
 # --- İstifadəçi Serializers ---
+from .models import UserProfile, OrganizationalFeedback
+from django.utils.translation import gettext_lazy as _
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        # Expose all the new detailed fields
+        fields = ['profil_sekli', 'bio', 'skills', 'interests', 'social_links', 'work_experience']
+
 class IshchiSerializer(serializers.ModelSerializer):
     organization_unit_name = serializers.CharField(source='organization_unit.name', read_only=True)
     full_name = serializers.CharField(source='get_full_name', read_only=True)
+    userprofile = UserProfileSerializer(read_only=True)
     
     class Meta:
         model = Ishchi
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name', 'full_name',
             'rol', 'vezife', 'organization_unit', 'organization_unit_name',
-            'elaqe_nomresi', 'dogum_tarixi', 'profil_sekli', 'is_active',
-            'date_joined', 'last_login'
+            'elaqe_nomresi', 'dogum_tarixi', 'is_active',
+            'date_joined', 'last_login', 'userprofile'
         ]
         extra_kwargs = {
             'password': {'write_only': True},
@@ -378,6 +388,51 @@ class StatisticalAnomalySerializer(serializers.Serializer):
 
 
 # === LMS SERIALIZERS ===
+
+# A simple serializer to represent the author when not anonymous
+class SimpleAuthorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name']
+
+class OrganizationalFeedbackSerializer(serializers.ModelSerializer):
+    # We use SimpleAuthorSerializer for the author field and make it read-only,
+    # as it will be set by the system, not the user.
+    author = SimpleAuthorSerializer(read_only=True)
+
+    # Use a SerializerMethodField to handle nested replies without causing infinite loops.
+    replies = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrganizationalFeedback
+        fields = [
+            'id', 'author', 'content', 'is_anonymous', 'created_at',
+            'parent', 'replies', 'target_content_type', 'target_object_id'
+        ]
+        # These fields are not expected from the user during creation
+        read_only_fields = ['author', 'created_at', 'replies']
+
+    def get_replies(self, obj):
+        # This method fetches all replies for a given feedback and serializes them
+        # using the same serializer class.
+        if obj.replies.exists():
+            return OrganizationalFeedbackSerializer(obj.replies.all(), many=True).data
+        return []
+
+    def to_representation(self, instance):
+        """
+        This method is the key to our anonymity feature. It runs just before the
+        data is sent out. We check the 'is_anonymous' flag and overwrite the
+        author data if it's true.
+        """
+        representation = super().to_representation(instance)
+        if instance.is_anonymous:
+            representation['author'] = {
+                'id': None,
+                'first_name': _('Anonymous'),
+                'last_name': _('User'),
+            }
+        return representation
 
 class TrainingCategorySerializer(serializers.ModelSerializer):
     programs_count = serializers.IntegerField(source='programs.count', read_only=True)

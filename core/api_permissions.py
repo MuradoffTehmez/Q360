@@ -1,7 +1,17 @@
 # core/api_permissions.py
 
 from rest_framework import permissions
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
+class IsAuthorOrReadOnly(BasePermission):
+    """
+    Allows full access if the request user is the author of the object.
+    Otherwise, allows read-only access (GET, HEAD, OPTIONS).
+    """
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        return obj.author == request.user
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
