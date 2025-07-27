@@ -35,3 +35,38 @@ class QuickFeedbackCategoryTranslationOptions(TranslationOptions):
 @register(IdeaCategory)
 class IdeaCategoryTranslationOptions(TranslationOptions):
     fields = ('name', 'description')
+
+# Historical models
+from .models import (
+    HistoricalOrganizationUnit, HistoricalSualKateqoriyasi, HistoricalSual,
+    HistoricalQiymetlendirmeDovru, HistoricalQuickFeedbackCategory, HistoricalIdea,
+    HistoricalIdeaComment
+)
+
+@register(HistoricalOrganizationUnit)
+class HistoricalOrganizationUnitTranslationOptions(TranslationOptions):
+    fields = ('name',)
+
+@register(HistoricalSualKateqoriyasi)
+class HistoricalSualKateqoriyasiTranslationOptions(TranslationOptions):
+    fields = ('ad',)
+
+@register(HistoricalSual)
+class HistoricalSualTranslationOptions(TranslationOptions):
+    fields = ('metn',)
+
+@register(HistoricalQiymetlendirmeDovru)
+class HistoricalQiymetlendirmeDovruTranslationOptions(TranslationOptions):
+    fields = ('ad',)
+
+@register(HistoricalQuickFeedbackCategory)
+class HistoricalQuickFeedbackCategoryTranslationOptions(TranslationOptions):
+    fields = ('name', 'description')
+
+@register(HistoricalIdeaComment)
+class HistoricalIdeaCommentTranslationOptions(TranslationOptions):
+    fields = ()
+
+@register(HistoricalIdea)
+class HistoricalIdeaTranslationOptions(TranslationOptions):
+    fields = ('title', 'description', 'estimated_impact', 'implementation_notes', 'review_notes')
