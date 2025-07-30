@@ -41,6 +41,7 @@ def training_programs(request):
     }
     return render(request, 'core/training/programs.html', context)
 
+# TODO training_programs.html səhifəsini tamamla
 
 @login_required
 def employee_learning_path(request):
@@ -50,7 +51,7 @@ def employee_learning_path(request):
         'active_nav': 'learning_path'
     }
     return render(request, 'core/training/learning_path.html', context)
-
+# TODO employee_learning_path.html səhifəsini tamamla
 
 @login_required
 @user_passes_test_with_message(is_hr_or_manager, "Bu səhifəyə giriş yalnız HR və rəhbər istifadəçilərinə açıqdır.")
@@ -62,6 +63,7 @@ def skills_matrix(request):
     }
     return render(request, 'core/training/skills_matrix.html', context)
 
+# TODO skills_matrix.html səhifəsini tamamla
 
 @login_required
 def certifications(request):
@@ -72,6 +74,7 @@ def certifications(request):
     }
     return render(request, 'core/training/certifications.html', context)
 
+# TODO certifications.html səhifəsini tamamla
 
 @login_required
 def training_api_stats(request):

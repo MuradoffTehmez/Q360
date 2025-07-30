@@ -85,8 +85,10 @@ class UserProfile(models.Model):
     user = models.OneToOneField(Ishchi, on_delete=models.CASCADE, related_name='userprofile')
     profil_sekli = models.ImageField(
         upload_to="profil_sekilleri/",
-        default="profil_sekilleri/default.png",
-        verbose_name="Profil Şəkli",
+        # default="profil_sekilleri/default.png",
+        # verbose_name="Profil Şəkli",
+        null=True,
+        blank=True,
     )
     bio = models.TextField(_("Bio"), blank=True, null=True)
     skills = models.TextField(_("Skills"), blank=True, null=True)

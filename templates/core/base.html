@@ -47,8 +47,9 @@
         <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
         <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
 
-        <title>{% block title %}{% trans "Qiymətləndirmə Sistemi" %}{% endblock
-            %}</title>
+        <title>
+            {% block title %}{% trans "Qiymətləndirmə Sistemi" %}{% endblock%}
+        </title>
 
         <!-- Critical CSS first -->
         <link
@@ -153,8 +154,7 @@
                         <!-- User menu -->
                         <li
                             class="nav-item dropdown animate__animated animate__fadeIn">
-                            <a
-                                class="nav-link dropdown-toggle d-flex align-items-center"
+                            <a  class="nav-link dropdown-toggle d-flex align-items-center"
                                 href="#" id="userDropdown"
                                 role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false"
@@ -233,6 +233,8 @@
                                 </li>
                             </ul>
                         </li>
+                        
+                        {% comment %}
                         {% else %}
                         <!-- Guest menu -->
                         <li class="nav-item animate__animated animate__fadeIn">
@@ -243,6 +245,8 @@
                             </a>
                         </li>
                         {% endif %}
+                        {% endcomment %}
+
                     </ul>
                 </div>
             </div>

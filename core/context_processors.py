@@ -38,7 +38,7 @@ def global_context(request):
     """
     context = {
         'site_name': 'Qiymətləndirmə Sistemi',
-        'site_version': '2.0',
+        'site_version': '1.0',
         'current_year': timezone.now().year,
         'debug': settings.DEBUG,
     }

@@ -272,36 +272,36 @@
   };
 
   // Performance monitoring
-  const performanceManager = {
-    init() {
-      if ('performance' in window) {
-        this.monitorPageLoad();
-        this.monitorNetworkRequests();
-      }
-    },
+  // const performanceManager = {
+  //   init() {
+  //     if ('performance' in window) {
+  //       this.monitorPageLoad();
+  //       this.monitorNetworkRequests();
+  //     }
+  //   },
 
-    monitorPageLoad() {
-      window.addEventListener('load', () => {
-        const perfData = performance.getEntriesByType('navigation')[0];
-        if (perfData) {
-          console.log('Səhifə yüklənmə vaxtı:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
-        }
-      });
-    },
+  //   monitorPageLoad() {
+  //     window.addEventListener('load', () => {
+  //       const perfData = performance.getEntriesByType('navigation')[0];
+  //       if (perfData) {
+  //         console.log('Səhifə yüklənmə vaxtı:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
+  //       }
+  //     });
+  //   },
 
-    monitorNetworkRequests() {
-      const observer = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        entries.forEach(entry => {
-          if (entry.duration > 1000) {
-            console.warn('Yavaş sorğu:', entry.name, entry.duration + 'ms');
-          }
-        });
-      });
+  //   monitorNetworkRequests() {
+  //     const observer = new PerformanceObserver((list) => {
+  //       const entries = list.getEntries();
+  //       entries.forEach(entry => {
+  //         if (entry.duration > 1000) {
+  //           console.warn('Yavaş sorğu:', entry.name, entry.duration + 'ms');
+  //         }
+  //       });
+  //     });
 
-      observer.observe({ entryTypes: ['resource'] });
-    }
-  };
+  //     observer.observe({ entryTypes: ['resource'] });
+  //   }
+  // };
 
   // Initialize everything when DOM is ready
   document.addEventListener('DOMContentLoaded', () => {

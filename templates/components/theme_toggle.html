@@ -15,9 +15,13 @@
 </div>
 
 <!-- Theme preference form for users without JavaScript -->
+
+{% comment %}
+    
+
+    
 <noscript>
-    <form method="post" action="{% url 'set_theme_preference' %}"
-        class="d-inline">
+    <form method="post" action="{% url 'set_theme_preference' %}" class="d-inline">
         {% csrf_token %}
         <div class="btn-group btn-group-sm" role="group"
             aria-label="{% trans 'Theme selection' %}">
@@ -44,6 +48,8 @@
         </button>
     </form>
 </noscript>
+
+{% endcomment %}
 
 <style>
 /* Component-specific styles */

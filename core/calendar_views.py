@@ -26,7 +26,7 @@ def calendar_view(request):
     context = {
         'title': 'Təqvim və Hadisələr'
     }
-    return render(request, 'core/calendar/calendar_view.html', context)
+    return render(request, 'core/calendar/calendar_view.html', context) 
 
 
 @login_required
