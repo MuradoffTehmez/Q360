@@ -24,6 +24,7 @@ if __name__ == "__main__":
 
 import os
 import subprocess
+import shutil # Add this line to import shutil
 from django.core.management.base import BaseCommand
 
 BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
