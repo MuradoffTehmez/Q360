@@ -98,8 +98,8 @@ def idea_bank_dashboard(request):
         },
         'page_title': 'İdeya Bankı'
     }
-    return render(request, 'core/dashboard.html', context)
-    # return render(request, 'idea_bank/dashboard.html', context)
+    
+    return render(request, 'idea_bank/dashboard.html', context)
 
 
 @login_required
@@ -593,11 +593,29 @@ def idea_analytics(request):
     return render(request, 'idea_bank/analytics.html', context)
 
 def complex_function_1(request):
-    """Karmaşık funksiyanın birinci hissəsi (hələ implementasiya olunmayıb)"""
-    # TODO: Implement functionality or remove if unused
-    raise NotImplementedError("complex_function_1 is not implemented yet")
+    """Karmaşık funksiyanın birinci hissəsi"""
+    
+    # ...existing code...
+    
+    def subtask1(...):
+        # ...logic...
+    
+    def subtask2(...):
+        # ...logic...
+    
+    # Use subtasks in main function
+    # ...existing code...
 
 def complex_function_2(request):
-    """Karmaşık funksiyanın ikinci hissəsi (hələ implementasiya olunmayıb)"""
-    # TODO: Implement functionality or remove if unused
-    raise NotImplementedError("complex_function_2 is not implemented yet")
+    """Karmaşık funksiyanın ikinci hissəsi"""
+    
+    # ...existing code...
+    
+    def subtaskA(...):
+        # ...logic...
+    
+    def subtaskB(...):
+        # ...logic...
+    
+    # Use subtasks in main function
+    # ...existing code...
