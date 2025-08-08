@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Build script for internationalization assets
- * Processes translation files and creates optimized bundles
+//  * Processes translation files and creates optimized bundles
  */
 
 const fs = require('fs');
