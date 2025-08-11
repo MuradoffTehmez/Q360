@@ -18,7 +18,7 @@ logger = logging.getLogger('audit')
 class AIRiskDetector:
     """
     AI əsaslı risk aşkarlama sistemi.
-    Proaktiv olaraq problemli işçi münasibətlərini və riskləri aşkarlayır.
+    Proaktiv olaraq problemli işçi münasibətlərini və riskləri təyin edir.
     """
     
     def __init__(self):
