@@ -16,11 +16,11 @@ from .api_views import (
     StrategicHRPlanningViewSet, TranslationAPIView, OrganizationalFeedbackViewSet
 )
 
-# Router yaradılması motoduyla 
+# Router yaradılması motoduyla aaaaa
 router = DefaultRouter()
 router.register(r'organizational-feedback', OrganizationalFeedbackViewSet, basename='organizational-feedback')
 
-# ViewSet-ləri router-a qoşmaq
+# ViewSet-ləri router-a qoşmaq aaaaa
 router.register(r'users', IshchiViewSet)
 router.register(r'organization-units', OrganizationUnitViewSet)
 router.register(r'question-categories', SualKateqoriyasiViewSet)
