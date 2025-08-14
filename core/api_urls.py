@@ -16,7 +16,7 @@ from .api_views import (
     StrategicHRPlanningViewSet, TranslationAPIView, OrganizationalFeedbackViewSet
 )
 
-# Router yaradılması motoduyla
+# Router yaradılması motoduyla 
 router = DefaultRouter()
 router.register(r'organizational-feedback', OrganizationalFeedbackViewSet, basename='organizational-feedback')
 
