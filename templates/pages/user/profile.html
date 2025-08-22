@@ -1,4 +1,4 @@
-{% extends 'core/base.html' %}
+{% extends 'layouts/base.html' %}
 {% load i18n crispy_forms_tags %}
 
 {% block title %}{% trans "Profilim" %}{% endblock %}
@@ -36,7 +36,8 @@
                             "Əlaqə Nömrəsi:" %}</strong> <span
                             class="float-end">{{
                             user.elaqe_nomresi|default:"-" }}</span></li>
-                    <li class="list-group-item"><strong>{% trans "Doğum Tarixi:"
+                    <li class="list-group-item"><strong>{% trans
+                            "Doğum Tarixi:"
                             %}</strong> <span class="float-end">{{
                             user.dogum_tarixi|date:"d-m-Y"|default:"-"
                             }}</span></li>
