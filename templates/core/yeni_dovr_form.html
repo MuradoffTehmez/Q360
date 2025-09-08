@@ -1,8 +1,14 @@
-{% extends 'core/base.html' %}
+{% extends 'layouts/base.html' %}
 {% load static i18n %}
 {% load crispy_forms_tags %}
 
 {% block title %}{% trans "Yeni Qiymətləndirmə Dövrü Yarat" %}{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Ana Səhifə" %}</a></li>
+<li class="breadcrumb-item"><a href="{% url 'superadmin_paneli' %}">{% trans "Superadmin Paneli" %}</a></li>
+<li class="breadcrumb-item active">{% trans "Yeni Qiymətləndirmə Dövrü Yarat" %}</li>
+{% endblock %}
 
 {% block content %}
 <div class="animate__animated animate__fadeIn">

@@ -1,7 +1,12 @@
-{% extends 'core/base.html' %}
+{% extends 'layouts/base.html' %}
 {% load static i18n %}
 
 {% block title %}{% trans "Rəhbər Paneli" %}{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Ana Səhifə" %}</a></li>
+<li class="breadcrumb-item active">{% trans "Rəhbər Paneli" %}</li>
+{% endblock %}
 
 {% block content %}
 <h2>{% trans "Rəhbər Paneli" %}</h2>
@@ -58,7 +63,7 @@
     },
         datasets: [{
             label: '{% trans "Komandanın Ortalama Balı" %}',
-            data: {{ chart_data| safe }},
+            data: {{ chart_data| safe },
         backgroundColor: [
             'rgba(255, 99, 132, 0.5)',
             'rgba(54, 162, 235, 0.5)',

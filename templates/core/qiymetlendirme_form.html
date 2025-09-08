@@ -1,7 +1,12 @@
-{% extends 'core/base.html' %}
+{% extends 'layouts/base.html' %}
 {% load static i18n %}
 
 {% block title %}{% trans "Qiymətləndirmə Formu" %}{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Ana Səhifə" %}</a></li>
+<li class="breadcrumb-item active">{% trans "Qiymətləndirmə Formu" %}</li>
+{% endblock %}
 
 {% block content %}
 <div class="container py-4 animate__animated animate__fadeIn">
@@ -9,8 +14,7 @@
         <h2 class="fw-bold text-primary display-5">{% trans
             "Qiymətləndirmə Formu" %}</h2>
         <p class="text-muted fs-5">{% trans "Qiymətləndirilən şəxs:" %}
-            <strong>{{
-                qiymetlendirme.qiymetlendirilen.get_full_name }}</strong></p>
+            <strong>{{ qiymetlendirme.qiymetlendirilen.get_full_name }}</strong></p>
         <p class="text-muted fs-5">{% trans "Dövr:" %} <strong>{{
                 qiymetlendirme.dovr.ad }}</strong></p>
     </div>
@@ -40,8 +44,7 @@
                                 id="xal_{{ sual.id }}_{{ forloop.counter }}"
                                 value="{{ forloop.counter }}" required>
                             <label class="form-check-label"
-                                for="xal_{{ sual.id }}_{{ forloop.counter }}">{{
-                                forloop.counter }}</label>
+                                for="xal_{{ sual.id }}_{{ forloop.counter }}">{{ forloop.counter }}</label>
                         </div>
                         {% endfor %}
                     </div>

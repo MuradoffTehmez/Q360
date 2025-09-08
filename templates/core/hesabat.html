@@ -1,7 +1,12 @@
-{% extends 'core/base.html' %}
+{% extends 'layouts/base.html' %}
 {% load static i18n %}
 
 {% block title %}{% trans "Qiymətləndirmə Hesabatı" %}{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Ana Səhifə" %}</a></li>
+<li class="breadcrumb-item active">{% trans "Qiymətləndirmə Hesabatı" %}</li>
+{% endblock %}
 
 {% block content %}
 <div class="container py-4 animate__animated animate__fadeIn animate__faster">
@@ -27,7 +32,7 @@
             {% endif %}
             {% endif %}
             <a
-                href="{% url 'hesabat_pdf_yukle' detailed_context.ishchi.id %}?dovr_id={{ detailed_context.dovr.id }}"
+                href="{% url 'hesabat_pdf_yukle' detailed_context.ishci.id %}?dovr_id={{ detailed_context.dovr.id }}"
                 class="btn btn-outline-danger" target="_blank">
                 <i class="bi bi-file-earmark-pdf"></i> {% trans "PDF Yüklə" %}
             </a>
@@ -64,7 +69,7 @@
     <h4 class="mb-3">{{ detailed_context.dovr.ad }} {% trans
         "Dövrü üçün Detallı Analiz" %}</h4>
     <p><strong>{% trans "İşçi:" %}</strong> {{
-        detailed_context.ishchi.get_full_name }}</p>
+        detailed_context.ishci.get_full_name }}</p>
 
     <div class="row">
         <div class="col-md-6 mb-4">

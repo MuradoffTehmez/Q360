@@ -1,7 +1,12 @@
-{% extends "core/base.html" %}
+{% extends 'layouts/base.html' %}
 {% load i18n %}
 
 {% block title %}{{ unit.name }} - {% trans "Feedback" %}{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans "Ana Səhifə" %}</a></li>
+<li class="breadcrumb-item active">{{ unit.name }}</li>
+{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
