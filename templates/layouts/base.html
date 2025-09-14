@@ -171,47 +171,34 @@
                         </li>
 
                         <!-- New feature links -->
-                        {% if user.rol == 'REHBER' or user.rol == 'ADMIN' or
-                        user.is_superuser %}
+                        {% if user.rol == 'REHBER' or user.rol == 'ADMIN' or user.is_superuser %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#"
                                 id="navbarDropdown" role="button"
                                 data-bs-toggle="dropdown">
-                                <i class="bi bi-tools me-1"></i>{% trans
-                                "İdarəetmə" %}
+                                <i class="bi bi-tools me-1"></i>{% trans "İdarəetmə" %}
                             </a>
                             <ul class="dropdown-menu">
-                                <li><h6 class="dropdown-header">{% trans
-                                        "Performans Analizi" %}</h6></li>
+                                <li><h6 class="dropdown-header">{% trans "Performans Analizi" %}</h6></li>
                                 <li><a class="dropdown-item"
-                                        href="{% url 'ai_risk_dashboard' %}">{%
-                                        trans "AI Risk Analizi" %}</a></li>
+                                        href="{% url 'ai_risk_dashboard' %}">{% trans "AI Risk Analizi" %}</a></li>
                                 <li><a class="dropdown-item"
-                                        href="{% url 'participation_monitoring:dashboard' %}">{%
-                                        trans "İştirak Nəzarəti" %}</a></li>
+                                        href="{% url 'participation_monitoring:dashboard' %}">{% trans "İştirak Nəzarəti" %}</a></li>
                                 <li><a class="dropdown-item"
-                                        href="{% url 'gap_analysis:dashboard' %}">{%
-                                        trans "Fərq Təhlili" %}</a></li>
+                                        href="{% url 'gap_analysis:dashboard' %}">{% trans "Fərq Təhlili" %}</a></li>
                                 <li><a class="dropdown-item"
-                                        href="{% url 'performance_trends:dashboard' %}">{%
-                                        trans "İnkişaf Trendləri" %}</a></li>
+                                        href="{% url 'performance_trends:dashboard' %}">{% trans "İnkişaf Trendləri" %}</a></li>
 
                                 <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">{% trans
-                                        "İdarəetmə Alətləri" %}</h6></li>
+                                <li><h6 class="dropdown-header">{% trans "İdarəetmə Alətləri" %}</h6></li>
                                 <li><a class="dropdown-item"
-                                        href="{% url 'private_notes:dashboard' %}">{%
-                                        trans "Məxfi Qeydlər" %}</a></li>
+                                        href="{% url 'private_notes:dashboard' %}">{% trans "Məxfi Qeydlər" %}</a></li>
                                 <li><a class="dropdown-item"
-                                        href="{% url 'idea_bank:dashboard' %}">{%
-                                        trans "İdeya Bankı" %}</a></li>
+                                        href="{% url 'idea_bank:dashboard' %}">{% trans "İdeya Bankı" %}</a></li>
                                 <li><a class="dropdown-item"
-                                        href="{% url 'quick_feedback:dashboard' %}">{%
-                                        trans "Sürətli Geri Bildirim"
-                                        %}</a></li>
+                                        href="{% url 'quick_feedback:dashboard' %}">{% trans "Sürətli Geri Bildirim" %}</a></li>
                                 <li><a class="dropdown-item"
-                                        href="{% url 'self_review:dashboard' %}">{%
-                                        trans "Öz Qiymətləndirmə" %}</a></li>
+                                        href="{% url 'self_review:dashboard' %}">{% trans "Öz Qiymətləndirmə" %}</a></li>
                             </ul>
                         </li>
                         {% endif %}

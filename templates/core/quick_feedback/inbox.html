@@ -180,11 +180,15 @@
 
 {% block extra_js %}
 <script>
+    // Define base URLs for AJAX calls
+    const markReadUrl = "{% url 'quick_feedback:mark_read' 999999 %}".replace('999999', '');
+    const archiveUrl = "{% url 'quick_feedback:archive' 999999 %}".replace('999999', '');
+    
     // Mark as read
     document.querySelectorAll('.mark-read').forEach(button => {
         button.addEventListener('click', function() {
             const feedbackId = this.getAttribute('data-feedback-id');
-            fetch(`/quick-feedback/mark-read/${feedbackId}/`, {
+            fetch(markReadUrl + feedbackId + '/', {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
@@ -204,7 +208,7 @@
     document.querySelectorAll('.archive-btn').forEach(button => {
         button.addEventListener('click', function() {
             const feedbackId = this.getAttribute('data-feedback-id');
-            fetch(`/quick-feedback/archive/${feedbackId}/`, {
+            fetch(archiveUrl + feedbackId + '/', {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,

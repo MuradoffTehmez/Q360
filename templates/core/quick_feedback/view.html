@@ -148,10 +148,17 @@
 
 {% block extra_js %}
 <script>
+    // Define base URLs for AJAX calls
+    const markReadUrl = "{% url 'quick_feedback:mark_read' 999999 %}".replace('999999', '');
+    const archiveUrl = "{% url 'quick_feedback:archive' 999999 %}".replace('999999', '');
+    
+    // NOTE: The following URL is not found in urls.py and needs to be created:
+    // /quick-feedback/reply/feedbackId/
+    
     // Mark as read
     document.querySelector('.mark-as-read').addEventListener('click', function() {
         const feedbackId = this.getAttribute('data-feedback-id');
-        fetch(`/quick-feedback/mark-read/${feedbackId}/`, {
+        fetch(markReadUrl + feedbackId + '/', {
             method: 'POST',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
@@ -179,6 +186,8 @@
         const feedbackId = document.getElementById('replyToFeedbackId').value;
         const message = document.getElementById('replyMessage').value;
         
+        // WARNING: This URL is not defined in urls.py
+        // Please create a URL pattern for this endpoint
         fetch(`/quick-feedback/reply/${feedbackId}/`, {
             method: 'POST',
             headers: {
@@ -198,7 +207,7 @@
     // Archive button
     document.querySelector('.archive-btn').addEventListener('click', function() {
         const feedbackId = this.getAttribute('data-feedback-id');
-        fetch(`/quick-feedback/archive/${feedbackId}/`, {
+        fetch(archiveUrl + feedbackId + '/', {
             method: 'POST',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
