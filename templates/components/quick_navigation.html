@@ -96,7 +96,7 @@
     <!-- AI Risk Detection -->
     {% if user.rol == 'hr' or user.rol == 'manager' or user.is_superuser %}
     <div class="col-lg-2 col-md-4 col-sm-6">
-        <a href="{% url 'ai_risk_dashboard' %}"
+        <a href="{% url 'core:ai_risk_dashboard' %}"
             class="card h-100 text-decoration-none quick-nav-card">
             <div class="card-body text-center p-3">
                 <div

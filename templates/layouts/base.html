@@ -180,8 +180,9 @@
                             </a>
                             <ul class="dropdown-menu">
                                 <li><h6 class="dropdown-header">{% trans "Performans Analizi" %}</h6></li>
-                                <li><a class="dropdown-item"
-                                        href="{% url 'ai_risk_dashboard' %}">{% trans "AI Risk Analizi" %}</a></li>
+                                                                <li><a class="dropdown-item"
+                                        href="{% url 'core:ai_risk_dashboard' %}">{%
+                                        trans "AI Risk Analizi" %}</a></li>
                                 <li><a class="dropdown-item"
                                         href="{% url 'participation_monitoring:dashboard' %}">{% trans "İştirak Nəzarəti" %}</a></li>
                                 <li><a class="dropdown-item"
@@ -270,8 +271,7 @@
                                             class="bi bi-file-earmark-text me-2"></i>{%
                                         trans "Hesabatım" %}
                                     </a></li>
-                                {% if user.rol == 'REHBER' or user.is_superuser
-                                %}
+                                {% if user.rol == 'REHBER' or user.is_superuser %}
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>

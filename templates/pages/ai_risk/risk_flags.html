@@ -4,11 +4,11 @@
 {% block title %}{% trans "Risk Flags Management" %}{% endblock %}
 
 {% block breadcrumb_items %}
-<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans
+<li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">{% trans
         "Ana Səhifə" %}</a></li>
-<li class="breadcrumb-item"><a href="{% url 'ai_risk_dashboard' %}">{% trans
+<li class="breadcrumb-item"><a href="{% url 'core:ai_risk_dashboard' %}">{% trans
         "AI Risk Dashboard" %}</a></li>
-<li class="breadcrumb-item active">{% trans "Risk Flags" %}</li>
+<li class="breadcrumb-item active">{% trans "Risk Flags Management" %}</li>
 {% endblock %}
 
 {% block extra_head %}

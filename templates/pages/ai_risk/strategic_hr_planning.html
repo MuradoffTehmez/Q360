@@ -4,9 +4,9 @@
 {% block title %}{% trans "Strategic HR Planning" %}{% endblock %}
 
 {% block breadcrumb_items %}
-<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">{% trans
+<li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">{% trans
         "Ana Səhifə" %}</a></li>
-<li class="breadcrumb-item"><a href="{% url 'ai_risk_dashboard' %}">{% trans
+<li class="breadcrumb-item"><a href="{% url 'core:ai_risk_dashboard' %}">{% trans
         "AI Risk Dashboard" %}</a></li>
 <li class="breadcrumb-item active">{% trans "Strategic HR Planning" %}</li>
 {% endblock %}

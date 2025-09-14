@@ -12,6 +12,7 @@ from . import training_views
 from . import performance_views
 from .views import user_profile, feedback
 
+app_name = 'core'
 urlpatterns = [
     path('profile/<int:pk>/', user_profile.UserProfileDetailView.as_view(), name='user_profile_detail'),
     path('unit/<int:unit_id>/', feedback.organizational_unit_detail, name='organizational_unit_detail'),
