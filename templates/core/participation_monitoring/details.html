@@ -1,0 +1,352 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{{ cycle.ad }} - {% trans "İştirak Detalları" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'participation_monitoring:dashboard' %}">{% trans "İştirak Nəzarəti" %}</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {{ cycle.ad|truncatewords:3 }}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h2>{{ cycle.ad }}</h2>
+        <p>{% trans "Qiymətləndirmə dövrü üzrə iştirak detalları." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Dövr Məlumatları" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <strong>{% trans "Başlama tarixi:" %}</strong> 
+                                {{ cycle.bashlama_tarixi|date:"d.m.Y" }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>{% trans "Bitmə tarixi:" %}</strong> 
+                                {{ cycle.bitme_tarixi|date:"d.m.Y" }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>{% trans "Status:" %}</strong> 
+                                <span class="badge bg-{% if cycle.status == 'ACTIVE' %}success{% elif cycle.status == 'OVERDUE' %}danger{% else %}warning{% endif %}">
+                                    {{ cycle.get_status_display }}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <strong>{% trans "Ümumi qiymətləndirmə:" %}</strong> 
+                                {{ cycle.total_evaluations }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>{% trans "Tamamlanan:" %}</strong> 
+                                {{ cycle.completed_evaluations }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>{% trans "Tamamlama faizi:" %}</strong> 
+                                {{ cycle.completion_percentage|floatformat:1 }}%
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <div class="progress">
+                        <div class="progress-bar" 
+                             role="progressbar" 
+                             style="width: {{ cycle.completion_percentage }}%;" 
+                             aria-valuenow="{{ cycle.completion_percentage }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ cycle.completion_percentage|floatformat:0 }}% {% trans "tamamlanıb" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Əməliyyatlar" %}</h5>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-warning w-100 mb-2 reminder-btn" 
+                        data-cycle-id="{{ cycle.id }}">
+                    <i class="fas fa-bell me-1"></i>
+                    {% trans "Xatırlat" %}
+                </button>
+                <a href="{% url 'participation_monitoring:dashboard' %}" class="btn btn-secondary w-100">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    {% trans "Geri qayıt" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "İşçilər Üzrə İştirak Statusu" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{% trans "İşçi" %}</th>
+                                <th>{% trans "Departament" %}</th>
+                                <th>{% trans "Status" %}</th>
+                                <th>{% trans "Tamamlama Tarixi" %}</th>
+                                <th>{% trans "Əməliyyat" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in employees %}
+                            <tr>
+                                <td>{{ employee.user.get_full_name }}</td>
+                                <td>{{ employee.user.organization_unit.name }}</td>
+                                <td>
+                                    <span class="badge bg-{% if employee.status == 'COMPLETED' %}success{% elif employee.status == 'OVERDUE' %}danger{% elif employee.status == 'PENDING' %}warning{% else %}secondary{% endif %}">
+                                        {{ employee.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if employee.completed_at %}
+                                        {{ employee.completed_at|date:"d.m.Y H:i" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary reminder-individual-btn" 
+                                            data-employee-id="{{ employee.user.id }}" 
+                                            data-cycle-id="{{ cycle.id }}">
+                                        <i class="fas fa-bell"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Statistikalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ümumi İşçi" %}</span>
+                            <strong>{{ stats.total_employees }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Tamamlanan" %}</span>
+                            <strong>{{ stats.completed }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Gözləyən" %}</span>
+                            <strong>{{ stats.pending }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Gecikən" %}</span>
+                            <strong>{{ stats.overdue }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Tamamlama Faizi" %}</span>
+                            <strong>{{ stats.completion_rate|floatformat:1 }}%</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ən Az İştirak Edenlər" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if low_participation_employees %}
+                    <div class="list-group">
+                        {% for employee in low_participation_employees %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>{{ employee.user.get_full_name|truncatewords:2 }}</span>
+                                <span class="badge bg-warning rounded-pill">
+                                    {{ employee.progress|floatformat:0 }}%
+                                </span>
+                            </div>
+                            <small class="text-muted">{{ employee.user.organization_unit.name }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda məlumat yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Zaman Əsasında İzləmə" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="timelineChart" style="height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Timeline chart
+    const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+    const timelineChart = new Chart(timelineCtx, {
+        type: 'line',
+        data: {
+            labels: {{ timeline_data.dates|safe }},
+            datasets: [{
+                label: '{% trans "Tamamlanan Qiymətləndirmə" %}',
+                data: {{ timeline_data.completed_counts|safe }},
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Cycle reminder functionality
+    document.querySelector('.reminder-btn')?.addEventListener('click', function() {
+        const cycleId = this.getAttribute('data-cycle-id');
+        
+        fetch(`/participation-monitoring/send-reminder/${cycleId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('{% trans "Xatırlatma uğurla göndərildi!" %}');
+            } else {
+                alert(data.error || '{% trans "Səhv baş verdi" %}');
+            }
+        });
+    });
+    
+    // Individual reminder functionality
+    document.querySelectorAll('.reminder-individual-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const employeeId = this.getAttribute('data-employee-id');
+            const cycleId = this.getAttribute('data-cycle-id');
+            
+            fetch(`/participation-monitoring/send-individual-reminder/${cycleId}/${employeeId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('{% trans "Fərdi xatırlatma uğurla göndərildi!" %}');
+                } else {
+                    alert(data.error || '{% trans "Səhv baş verdi" %}');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

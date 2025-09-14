@@ -1,0 +1,241 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "İdeyanı Redaktə et" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'idea_bank:dashboard' %}">{% trans "İdeya Bankı" %}</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'idea_bank:detail' idea.id %}">{{ idea.basliq|truncatewords:3 }}</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% trans "Redaktə et" %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "İdeyanı Redaktə et" %}</h2>
+        <p>{% trans "İdeyanızı redaktə edin." %}</p>
+    </div>
+</div>
+
+<form method="post" id="ideaForm">
+    {% csrf_token %}
+    <input type="hidden" name="idea_id" value="{{ idea.id }}">
+    
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "İdeya Məzmunu" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="basliq" class="form-label">{% trans "Başlıq" %}</label>
+                        <input type="text" class="form-control" id="basliq" name="basliq" 
+                               value="{{ form.basliq.value|default:idea.basliq }}" required>
+                        {% if form.basliq.errors %}
+                            <div class="text-danger">{{ form.basliq.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">{% trans "Təsvir" %}</label>
+                        <textarea class="form-control" id="description" name="description" rows="5" required>{{ form.description.value|default:idea.description }}</textarea>
+                        <div class="form-text">
+                            {% trans "İdeyanızı ətraflı şəkildə təsvir edin." %}
+                        </div>
+                        {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="category" class="form-label">{% trans "Kateqoriya" %}</label>
+                        <select class="form-select" id="category" name="category" required>
+                            <option value="">{% trans "Kateqoriya seçin" %}</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if form.category.value == category.id|stringformat:"i" or idea.category.id == category.id %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.category.errors %}
+                            <div class="text-danger">{{ form.category.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="benefits" class="form-label">{% trans "Faydalar" %}</label>
+                        <textarea class="form-control" id="benefits" name="benefits" rows="3">{{ form.benefits.value|default:idea.benefits }}</textarea>
+                        <div class="form-text">
+                            {% trans "Bu ideyanın təşkilata necə faydası olar?" %}
+                        </div>
+                        {% if form.benefits.errors %}
+                            <div class="text-danger">{{ form.benefits.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="implementation_steps" class="form-label">{% trans "Həyata Keçirmə Addımları" %}</label>
+                        <textarea class="form-control" id="implementation_steps" name="implementation_steps" rows="3">{{ form.implementation_steps.value|default:idea.implementation_steps }}</textarea>
+                        <div class="form-text">
+                            {% trans "İdeyanın həyata keçirilməsi üçün addımları qeyd edin." %}
+                        </div>
+                        {% if form.implementation_steps.errors %}
+                            <div class="text-danger">{{ form.implementation_steps.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="resources_needed" class="form-label">{% trans "Lazım Olan Resurslar" %}</label>
+                        <textarea class="form-control" id="resources_needed" name="resources_needed" rows="3">{{ form.resources_needed.value|default:idea.resources_needed }}</textarea>
+                        <div class="form-text">
+                            {% trans "Bu ideyanın həyata keçirilməsi üçün hansı resurslar lazımdır?" %}
+                        </div>
+                        {% if form.resources_needed.errors %}
+                            <div class="text-danger">{{ form.resources_needed.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Təlimatlar" %}</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>{% trans "İdeyanızı aydın və konkret şəkildə ifadə edin" %}</li>
+                        <li>{% trans "Mümkün qədər çox detay verin" %}</li>
+                        <li>{% trans "İdeyanın tətbiq edilməsi üçün konkret addımlar təqdim edin" %}</li>
+                        <li>{% trans "İdeyanın təşkilata necə faydası olduğununu izah edin" %}</li>
+                        <li>{% trans "Lazım olan resursları qeyd edin" %}</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Əməliyyatlar" %}</h5>
+                </div>
+                <div class="card-body">
+                    <button type="submit" class="btn btn-success w-100 mb-2">
+                        <i class="fas fa-save me-1"></i>
+                        {% trans "Yadda Saxla" %}
+                    </button>
+                    <a href="{% url 'idea_bank:detail' idea.id %}" class="btn btn-secondary w-100 mb-2">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        {% trans "Ləğv et" %}
+                    </a>
+                    {% if user.rol in 'ADMIN,SUPERADMIN' %}
+                    <button type="button" class="btn btn-danger w-100 delete-idea-btn" 
+                            data-idea-id="{{ idea.id }}">
+                        <i class="fas fa-trash me-1"></i>
+                        {% trans "Sil" %}
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "İrəliləyiş" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                    <p class="mt-2 text-center">
+                        <span id="progressText">{% trans "Formu doldurun" %}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form progress tracking
+    const form = document.getElementById('ideaForm');
+    const inputs = form.querySelectorAll('input, textarea, select');
+    const progressBar = document.querySelector('.progress-bar');
+    const progressText = document.getElementById('progressText');
+    
+    function updateProgress() {
+        let filled = 0;
+        inputs.forEach(input => {
+            if (input.value.trim() !== '' || input.tagName === 'SELECT') {
+                filled++;
+            }
+        });
+        
+        const progress = Math.round((filled / inputs.length) * 100);
+        progressBar.style.width = progress + '%';
+        progressBar.setAttribute('aria-valuenow', progress);
+        progressBar.textContent = progress + '%';
+        
+        if (progress === 100) {
+            progressText.textContent = '{% trans "Form tam dolduruldu" %}';
+        } else if (progress > 0) {
+            progressText.textContent = '{% trans "Davam edin..." %}';
+        } else {
+            progressText.textContent = '{% trans "Formu doldurun" %}';
+        }
+    }
+    
+    // Update progress on input
+    inputs.forEach(input => {
+        input.addEventListener('input', updateProgress);
+        input.addEventListener('change', updateProgress);
+    });
+    
+    // Initialize progress
+    updateProgress();
+    
+    // Form submission handling
+    form.addEventListener('submit', function(e) {
+        // Disable submit button to prevent double submission
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>' + submitButton.textContent;
+    });
+    
+    // Delete idea functionality
+    document.querySelector('.delete-idea-btn')?.addEventListener('click', function() {
+        if (confirm('{% trans "Bu ideyanı silmək istədiyinizə əminsiniz?" %}')) {
+            const ideaId = this.getAttribute('data-idea-id');
+            
+            fetch(`/idea-bank/delete/${ideaId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = "{% url 'idea_bank:dashboard' %}";
+                } else {
+                    alert(data.error || '{% trans "Səhv baş verdi" %}');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

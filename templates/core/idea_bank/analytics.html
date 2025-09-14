@@ -1,0 +1,319 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "İdeya Bankı Analitikası" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'idea_bank:dashboard' %}">{% trans "İdeya Bankı" %}</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% trans "Analitika" %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "İdeya Bankı Analitikası" %}</h2>
+        <p>{% trans "İdeya bankının istatistikası və trendləri." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body text-center">
+                <h5 class="card-title">{% trans "Ümumi İdeya" %}</h5>
+                <h2>{{ stats.total_ideas }}</h2>
+                <p class="mb-0">{% trans "bütün ideyalar" %}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body text-center">
+                <h5 class="card-title">{% trans "Təsdiqlənmiş" %}</h5>
+                <h2>{{ stats.approved_ideas }}</h2>
+                <p class="mb-0">{{ stats.approval_rate|floatformat:1 }}% {% trans "təsdiqlənib" %}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body text-center">
+                <h5 class="card-title">{% trans "Gözləyən" %}</h5>
+                <h2>{{ stats.pending_ideas }}</h2>
+                <p class="mb-0">{% trans "təsdiqlənməyib" %}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body text-center">
+                <h5 class="card-title">{% trans "Bu Ay Əlavə Edilən" %}</h5>
+                <h2>{{ stats.ideas_this_month }}</h2>
+                <p class="mb-0">{% trans "yeni ideya" %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Zaman Əsasında Trendlər" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="trendChart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ən Populyar Kateqoriyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="categoryChart" style="height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ən Aktiv İstifadəçilər" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if top_contributors %}
+                    <div class="list-group">
+                        {% for contributor in top_contributors %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">{{ contributor.user.get_full_name }}</h6>
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ contributor.idea_count }}
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">{% trans "Təsdiqlənmiş:" %} {{ contributor.approved_count }}</small>
+                                <small class="text-muted">{% trans "Bəyənmə:" %} {{ contributor.total_upvotes }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda məlumat yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ən Yaxşı İdeyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if top_ideas %}
+                    <div class="list-group">
+                        {% for idea in top_ideas %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">
+                                    <a href="{% url 'idea_bank:detail' idea.id %}">
+                                        {{ idea.basliq|truncatewords:5 }}
+                                    </a>
+                                </h6>
+                                <span class="badge bg-success rounded-pill">
+                                    {{ idea.upvotes }}
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">{{ idea.author.get_full_name }}</small>
+                                <small class="text-muted">{{ idea.category.name }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda məlumat yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Departamentlər Üzrə Dağılım" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if department_stats %}
+                    <div class="list-group">
+                        {% for dept in department_stats %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>{{ dept.department.name }}</span>
+                                <span class="badge bg-info rounded-pill">
+                                    {{ dept.idea_count }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda məlumat yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "İnteqrasiya Statusu" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Həyata keçirilmiş" %}</span>
+                            <strong>{{ integration_stats.implemented }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Davam edən" %}</span>
+                            <strong>{{ integration_stats.in_progress }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Planlaşdırılmış" %}</span>
+                            <strong>{{ integration_stats.planned }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Rədd edilmiş" %}</span>
+                            <strong>{{ integration_stats.rejected }}</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Tövsiyələr" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>{% trans "İdeya bankını aktiv istifadə edin" %}</li>
+                    <li>{% trans "Yaxşı ideyaları təsdiqləyin" %}</li>
+                    <li>{% trans "İşçiləri motivasiya edin" %}</li>
+                    <li>{% trans "İdeyaları həyata keçirin" %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Trend chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: {{ trend_data.months|safe }},
+            datasets: [
+                {
+                    label: '{% trans "Ümumi İdeya" %}',
+                    data: {{ trend_data.total_ideas|safe }},
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    fill: false
+                },
+                {
+                    label: '{% trans "Təsdiqlənmiş" %}',
+                    data: {{ trend_data.approved_ideas|safe }},
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: false
+                },
+                {
+                    label: '{% trans "Gözləyən" %}',
+                    data: {{ trend_data.pending_ideas|safe }},
+                    borderColor: 'rgb(255, 205, 86)',
+                    backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Category chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryChart = new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ category_data.names|safe }},
+            datasets: [{
+                data: {{ category_data.counts|safe }},
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 205, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,265 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Mənim İdeyalarım" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'idea_bank:dashboard' %}">{% trans "İdeya Bankı" %}</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% trans "Mənim İdeyalarım" %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Mənim İdeyalarım" %}</h2>
+        <p>{% trans "Paylaşdığınız ideyalar və onların statusları." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Paylaşdığınız İdeyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if ideas %}
+                    <div class="list-group">
+                        {% for idea in ideas %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5 class="mb-1">
+                                        <a href="{% url 'idea_bank:detail' idea.id %}">
+                                            {{ idea.basliq }}
+                                        </a>
+                                    </h5>
+                                    <p class="mb-1">{{ idea.description|truncatewords:20 }}</p>
+                                    <small class="text-muted">
+                                        {% trans "Kateqoriya:" %} 
+                                        <span class="badge bg-secondary">{{ idea.category.name }}</span>
+                                        {% trans "Tarix:" %} {{ idea.created_at|date:"d.m.Y H:i" }}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="mb-2">
+                                        <span class="badge bg-{% if idea.status == 'YENI' %}primary{% elif idea.status == 'TESDIQLENMIS' %}success{% elif idea.status == 'TESDIQSIZ' %}danger{% else %}secondary{% endif %}">
+                                            {{ idea.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-success vote-btn" 
+                                                data-idea-id="{{ idea.id }}" 
+                                                data-vote-type="up">
+                                            <i class="fas fa-thumbs-up"></i> {{ idea.upvotes }}
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger vote-btn" 
+                                                data-idea-id="{{ idea.id }}" 
+                                                data-vote-type="down">
+                                            <i class="fas fa-thumbs-down"></i> {{ idea.downvotes }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2">
+                                <a href="{% url 'idea_bank:detail' idea.id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye me-1"></i>
+                                    {% trans "Bax" %}
+                                </a>
+                                {% if idea.status == 'YENI' %}
+                                <a href="{% url 'idea_bank:edit' idea.id %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit me-1"></i>
+                                    {% trans "Redaktə et" %}
+                                </a>
+                                <button class="btn btn-sm btn-danger delete-idea-btn" 
+                                        data-idea-id="{{ idea.id }}">
+                                    <i class="fas fa-trash me-1"></i>
+                                    {% trans "Sil" %}
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-lightbulb fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">{% trans "Hazırda ideya yoxdur" %}</h5>
+                        <p class="text-muted">{% trans "İlk ideya sahibi olmaq üçün 'Yeni İdeya' düyməsini basın." %}</p>
+                        <a href="{% url 'idea_bank:create' %}" class="btn btn-warning">
+                            <i class="fas fa-plus me-1"></i>
+                            {% trans "İlk İdeyanı Paylaş" %}
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Statistikalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ümumi İdeya" %}</span>
+                            <strong>{{ stats.total_ideas }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Təsdiqlənmiş" %}</span>
+                            <strong>{{ stats.approved_ideas }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Baxılmamış" %}</span>
+                            <strong>{{ stats.pending_ideas }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Rədd edilmiş" %}</span>
+                            <strong>{{ stats.rejected_ideas }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ümumi Bəyənmə" %}</span>
+                            <strong>{{ stats.total_upvotes }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ümumi Şərh" %}</span>
+                            <strong>{{ stats.total_comments }}</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Əməliyyatlar" %}</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'idea_bank:create' %}" class="btn btn-warning w-100 mb-2">
+                    <i class="fas fa-plus me-1"></i>
+                    {% trans "Yeni İdeya Paylaş" %}
+                </a>
+                <a href="{% url 'idea_bank:dashboard' %}" class="btn btn-primary w-100">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    {% trans "Geri qayıt" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Vote functionality
+    document.querySelectorAll('.vote-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const ideaId = this.getAttribute('data-idea-id');
+            const voteType = this.getAttribute('data-vote-type');
+            
+            fetch(`/idea-bank/vote/${ideaId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({vote_type: voteType})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error || '{% trans "Səhv baş verdi" %}');
+                }
+            });
+        });
+    });
+    
+    // Delete idea functionality
+    document.querySelectorAll('.delete-idea-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            if (confirm('{% trans "Bu ideyanı silmək istədiyinizə əminsiniz?" %}')) {
+                const ideaId = this.getAttribute('data-idea-id');
+                
+                fetch(`/idea-bank/delete/${ideaId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || '{% trans "Səhv baş verdi" %}');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,308 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "İdeya Təsdiqləmə Paneli" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'idea_bank:dashboard' %}">{% trans "İdeya Bankı" %}</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% trans "Təsdiqləmə Paneli" %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "İdeya Təsdiqləmə Paneli" %}</h2>
+        <p>{% trans "Yeni ideyaları təsdiqləyin və ya rədd edin." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Təsdiqləməyə Gözləyən İdeyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if pending_ideas %}
+                    <div class="list-group">
+                        {% for idea in pending_ideas %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5 class="mb-1">
+                                        <a href="{% url 'idea_bank:detail' idea.id %}">
+                                            {{ idea.basliq }}
+                                        </a>
+                                    </h5>
+                                    <p class="mb-1">{{ idea.description|truncatewords:20 }}</p>
+                                    <small class="text-muted">
+                                        {% trans "Paylaşan:" %} {{ idea.author.get_full_name }}
+                                        <br>
+                                        {% trans "Kateqoriya:" %} {{ idea.category.name }}
+                                        <br>
+                                        {% trans "Tarix:" %} {{ idea.created_at|date:"d.m.Y H:i" }}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="mb-2">
+                                        <span class="badge bg-primary">{% trans "Yeni" %}</span>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-success approve-btn" 
+                                                data-idea-id="{{ idea.id }}">
+                                            <i class="fas fa-check me-1"></i>
+                                            {% trans "Təsdiqlə" %}
+                                        </button>
+                                        <button class="btn btn-sm btn-danger reject-btn" 
+                                                data-idea-id="{{ idea.id }}">
+                                            <i class="fas fa-times me-1"></i>
+                                            {% trans "Rədd et" %}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2">
+                                <a href="{% url 'idea_bank:detail' idea.id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye me-1"></i>
+                                    {% trans "Detallı bax" %}
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                        <h5 class="text-success">{% trans "Təsdiqləməyə gözləyən ideya yoxdur" %}</h5>
+                        <p class="text-muted">{% trans "Bütün ideyalar təsdiqlənib və ya rədd edilib." %}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Statistikalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ümumi İdeya" %}</span>
+                            <strong>{{ stats.total_ideas }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Təsdiqlənmiş" %}</span>
+                            <strong>{{ stats.approved_ideas }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Rədd edilmiş" %}</span>
+                            <strong>{{ stats.rejected_ideas }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Gözləyən" %}</span>
+                            <strong>{{ stats.pending_ideas }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Bu Ay Əlavə Edilən" %}</span>
+                            <strong>{{ stats.ideas_this_month }}</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ən Aktiv İstifadəçilər" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if top_contributors %}
+                    <div class="list-group">
+                        {% for contributor in top_contributors %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>{{ contributor.user.get_full_name }}</span>
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ contributor.idea_count }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda məlumat yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Təsdiqlənmiş İdeyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if approved_ideas %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Başlıq" %}</th>
+                                    <th>{% trans "Paylaşan" %}</th>
+                                    <th>{% trans "Kateqoriya" %}</th>
+                                    <th>{% trans "Tarix" %}</th>
+                                    <th>{% trans "Bəyənmə" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Əməliyyat" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for idea in approved_ideas %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'idea_bank:detail' idea.id %}">
+                                            {{ idea.basliq|truncatewords:5 }}
+                                        </a>
+                                    </td>
+                                    <td>{{ idea.author.get_full_name }}</td>
+                                    <td>{{ idea.category.name }}</td>
+                                    <td>{{ idea.created_at|date:"d.m.Y" }}</td>
+                                    <td>{{ idea.upvotes }}</td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            {{ idea.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'idea_bank:detail' idea.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Təsdiqlənmiş ideya yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Approve idea functionality
+    document.querySelectorAll('.approve-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            if (confirm('{% trans "Bu ideyanı təsdiqləmək istədiyinizə əminsiniz?" %}')) {
+                const ideaId = this.getAttribute('data-idea-id');
+                
+                fetch(`/idea-bank/approve/${ideaId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || '{% trans "Səhv baş verdi" %}');
+                    }
+                });
+            }
+        });
+    });
+    
+    // Reject idea functionality
+    document.querySelectorAll('.reject-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            if (confirm('{% trans "Bu ideyanı rədd etmək istədiyinizə əminsiniz?" %}')) {
+                const ideaId = this.getAttribute('data-idea-id');
+                
+                fetch(`/idea-bank/reject/${ideaId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || '{% trans "Səhv baş verdi" %}');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
