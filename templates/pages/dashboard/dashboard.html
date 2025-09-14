@@ -3,235 +3,218 @@
 
 {% block title %}{% trans "Ana Səhifə" %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/modern-dashboard.css' %}">
+{% endblock %}
+
 {% block breadcrumb_items %}
 <ul>
     <li class="breadcrumb-item active">{% trans "Dashboard" %}</li>
 </ul>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-    .modern-card {
-        background: white;
-        border-radius: 18px;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-        padding: 2rem 1.5rem;
-        margin-bottom: 2rem;
-        transition: box-shadow 0.2s;
-    }
-
-    .modern-card:hover {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-    }
-
-    .modern-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 18px 18px 0 0;
-        padding: 1.5rem 1.5rem 1rem 1.5rem;
-        margin-bottom: 0;
-    }
-
-    .modern-avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        object-fit: cover;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        margin-right: 1rem;
-    }
-
-    .modern-badge {
-        font-size: 0.85rem;
-        padding: 0.4em 0.8em;
-        border-radius: 12px;
-        background: linear-gradient(90deg, #20c997 0%, #007bff 100%);
-        color: white;
-        margin-left: 0.5rem;
-    }
-
-    .modern-progress {
-        height: 8px;
-        border-radius: 4px;
-        background: #f1f3f6;
-        margin-top: 0.5rem;
-    }
-
-    .modern-progress-bar {
-        background: linear-gradient(90deg, #667eea 0%, #20c997 100%);
-        border-radius: 4px;
-        height: 100%;
-        transition: width 0.8s cubic-bezier(.4, 0, .2, 1);
-    }
-
-    .modern-list-group .list-group-item {
-        border: none;
-        border-radius: 12px;
-        margin-bottom: 0.5rem;
-        background: #f8f9fa;
-        transition: background 0.2s;
-    }
-
-    .modern-list-group .list-group-item:hover {
-        background: #e9ecef;
-    }
-
-    .modern-action-btn {
-        border-radius: 12px;
-        font-weight: 500;
-        padding: 0.6em 1.2em;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-        transition: background 0.2s;
-    }
-
-    .modern-action-btn:hover {
-        background: linear-gradient(90deg, #764ba2 0%, #20c997 100%);
-        color: white;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div
-    class="modern-card modern-header d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeInDown">
-    <div>
-        <h1 class="h3 mb-1">{% trans "Xoş gəldiniz" %}, {{ user.get_full_name|default:user.username }}</h1>
-        <p class="mb-0 opacity-75">{% trans "Performans idarəetmə sisteminə xoş gəldiniz" %}</p>
+<div class="modern-dashboard">
+    <!-- Hero Section -->
+    <div class="hero-section animate-fade-in-up">
+        <div class="hero-content">
+            <h1 class="hero-title">{% trans "Xoş gəldiniz" %}, {{ user.get_full_name|default:user.username }}</h1>
+            <p class="hero-subtitle">{% trans "Performans idarəetmə sisteminə xoş gəldiniz. Aşağıdakı statistikalar vasitəsilə performansınızı izləyin və inkişaf edin." %}</p>
+            <div class="d-flex gap-3 flex-wrap">
+                <a href="{% url 'interactive_dashboard' %}" class="btn btn-light btn-lg px-4 rounded-pill">
+                    <i class="bi bi-graph-up me-2"></i>{% trans "İnteraktiv Panel" %}
+                </a>
+                <a href="{% url 'calendar_view' %}" class="btn btn-outline-light btn-lg px-4 rounded-pill">
+                    <i class="bi bi-calendar-check me-2"></i>{% trans "Təqvim" %}
+                </a>
+            </div>
+        </div>
     </div>
-    <div class="text-end">
-        <small class="opacity-75">
-            {% trans "Son giriş" %}: {{ user.last_login|date:"d M Y, H:i" }}
-        </small>
-    </div>
-</div>
 
-<!-- Statistics Cards -->
-<div class="row g-4 mb-4">
-    <div class="col-md-3 col-sm-6">
-        <div class="modern-card text-center animate__animated animate__fadeInUp">
-            <div class="mb-2"><i class="bi bi-clock text-warning fs-2"></i></div>
-            <div class="stat-number fs-2 fw-bold">{{ pending_evaluations_count|default:0 }}</div>
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card animate-fade-in-up-delay-1">
+            <div class="stat-icon stat-icon-primary">
+                <i class="bi bi-clock"></i>
+            </div>
+            <div class="stat-number">{{ pending_evaluations_count|default:0 }}</div>
             <div class="stat-label">{% trans "Gözləməkdə" %}</div>
         </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="modern-card text-center animate__animated animate__fadeInUp">
-            <div class="mb-2"><i class="bi bi-check-circle text-success fs-2"></i></div>
-            <div class="stat-number fs-2 fw-bold">{{ completed_evaluations_count|default:0 }}</div>
+        
+        <div class="stat-card animate-fade-in-up-delay-2">
+            <div class="stat-icon stat-icon-success">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="stat-number">{{ completed_evaluations_count|default:0 }}</div>
             <div class="stat-label">{% trans "Tamamlanmış" %}</div>
         </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="modern-card text-center animate__animated animate__fadeInUp">
-            <div class="mb-2"><i class="bi bi-clipboard-data text-primary fs-2"></i></div>
-            <div class="stat-number fs-2 fw-bold">{{ total_evaluations_count|default:0 }}</div>
+        
+        <div class="stat-card animate-fade-in-up-delay-3">
+            <div class="stat-icon stat-icon-warning">
+                <i class="bi bi-clipboard-data"></i>
+            </div>
+            <div class="stat-number">{{ total_evaluations_count|default:0 }}</div>
             <div class="stat-label">{% trans "Ümumi" %}</div>
         </div>
-    </div>
-    {% if is_manager %}
-    <div class="col-md-3 col-sm-6">
-        <div class="modern-card text-center animate__animated animate__fadeInUp">
-            <div class="mb-2"><i class="bi bi-people text-info fs-2"></i></div>
-            <div class="stat-number fs-2 fw-bold">{{ team_members_count|default:0 }}</div>
+        
+        {% if is_manager %}
+        <div class="stat-card animate-fade-in-up-delay-3">
+            <div class="stat-icon stat-icon-info">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-number">{{ team_members_count|default:0 }}</div>
             <div class="stat-label">{% trans "Komanda Üzvləri" %}</div>
         </div>
-    </div>
-    {% endif %}
-</div>
-
-<!-- Active Development Plan -->
-{% if aktiv_plan %}
-<div class="modern-card animate__animated animate__fadeInUp">
-    <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-star text-warning fs-3 me-2"></i>
-        <h5 class="mb-0">{% trans "Aktiv İnkişaf Planınız" %}</h5>
-        <span class="modern-badge ms-2">{{ aktiv_plan.dovr.ad }}</span>
-    </div>
-    <div class="row align-items-center">
-        <div class="col-md-8">
-            <p class="mb-0 text-muted">{% trans "Sizin üçün aktiv inkişaf planı mövcuddur. Hədəflərinizi izləyin və
-                inkişaf edin." %}</p>
-        </div>
-        <div class="col-md-4 text-end">
-            <a href="{% url 'plan_bax' aktiv_plan.id %}" class="modern-action-btn btn btn-primary">
-                <i class="bi bi-arrow-right me-1"></i>{% trans "Plana Bax" %}
-            </a>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<!-- Evaluation Tasks -->
-<div class="modern-card animate__animated animate__fadeInUp">
-    <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-list-task text-primary fs-3 me-2"></i>
-        <h5 class="mb-0">{% trans "Qiymətləndirmə Tapşırıqlarınız" %}</h5>
-    </div>
-    {% if qiymetlendirmeler %}
-    <p class="text-muted mb-3">{% trans "Aşağıdakı şəxslər üçün qiymətləndirməni tamamlamalısınız" %}:</p>
-    <div class="modern-list-group">
-        {% for q in qiymetlendirmeler %}
-        <a href="{% url 'qiymetlendirme_etmek' q.id %}" class="list-group-item d-flex align-items-center">
-            {% if q.qiymetlendirilen.profil_sekli %}
-            <img src="{{ q.qiymetlendirilen.profil_sekli.url }}" alt="Avatar" class="modern-avatar">
-            {% else %}
-            <div class="modern-avatar bg-primary text-white d-flex align-items-center justify-content-center">
-                <i class="bi bi-person-fill"></i>
-            </div>
-            {% endif %}
-            <div>
-                <strong>{{ q.qiymetlendirilen.get_full_name }}</strong>
-                <div class="text-muted small">{{ q.dovr.ad }}</div>
-            </div>
-        </a>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="alert alert-info">{% trans "Qiymətləndirmə tapşırığınız yoxdur." %}</div>
-    {% endif %}
-</div>
-
-<!-- Quick Actions -->
-<div class="modern-card animate__animated animate__fadeInUp">
-    <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-lightning-charge text-warning fs-3 me-2"></i>
-        <h5 class="mb-0">{% trans "Tez Əməliyyatlar" %}</h5>
-    </div>
-    <div class="d-flex gap-3 flex-wrap">
-        <a href="{% url 'interactive_dashboard' %}" class="modern-action-btn btn btn-outline-primary">
-            <i class="bi bi-graph-up"></i> {% trans "İnteraktiv Panel" %}
-        </a>
-        <a href="{% url 'calendar_view' %}" class="modern-action-btn btn btn-outline-info">
-            <i class="bi bi-calendar-check"></i> {% trans "Təqvim" %}
-        </a>
-        <a href="{% url 'notification_center' %}" class="modern-action-btn btn btn-outline-warning">
-            <i class="bi bi-bell"></i> {% trans "Bildirişlər" %}
-        </a>
-        <a href="{% url 'report_center' %}" class="modern-action-btn btn btn-outline-success">
-            <i class="bi bi-file-bar-graph"></i> {% trans "Hesabatlar" %}
-        </a>
-        {% if user.rol == 'REHBER' or user.is_superuser %}
-        <a href="{% url 'rehber_paneli' %}" class="modern-action-btn btn btn-outline-secondary">
-            <i class="bi bi-people"></i> {% trans "Rəhbər Paneli" %}
-        </a>
         {% endif %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions-grid">
+        <div class="quick-action-card" onclick="window.location.href='{% url 'interactive_dashboard' %}'">
+            <div class="quick-action-icon">
+                <i class="bi bi-graph-up"></i>
+            </div>
+            <h5 class="quick-action-title">{% trans "İnteraktiv Panel" %}</h5>
+            <p class="quick-action-desc">{% trans "Performans statistikaları" %}</p>
+        </div>
+        
+        <div class="quick-action-card" onclick="window.location.href='{% url 'calendar_view' %}'">
+            <div class="quick-action-icon">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <h5 class="quick-action-title">{% trans "Təqvim" %}</h5>
+            <p class="quick-action-desc">{% trans "Hadisələr və dövrlər" %}</p>
+        </div>
+        
+        <div class="quick-action-card" onclick="window.location.href='{% url 'notification_center' %}'">
+            <div class="quick-action-icon">
+                <i class="bi bi-bell"></i>
+            </div>
+            <h5 class="quick-action-title">{% trans "Bildirişlər" %}</h5>
+            <p class="quick-action-desc">{% trans "Ən son bildirişlər" %}</p>
+        </div>
+        
+        <div class="quick-action-card" onclick="window.location.href='{% url 'report_center' %}'">
+            <div class="quick-action-icon">
+                <i class="bi bi-file-bar-graph"></i>
+            </div>
+            <h5 class="quick-action-title">{% trans "Hesabatlar" %}</h5>
+            <p class="quick-action-desc">{% trans "Performans hesabatları" %}</p>
+        </div>
+        
+        {% if user.rol == 'REHBER' or user.is_superuser %}
+        <div class="quick-action-card" onclick="window.location.href='{% url 'rehber_paneli' %}'">
+            <div class="quick-action-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <h5 class="quick-action-title">{% trans "Rəhbər Paneli" %}</h5>
+            <p class="quick-action-desc">{% trans "Komanda idarəetmə" %}</p>
+        </div>
+        {% endif %}
+        
+        {% if aktiv_plan %}
+        <div class="quick-action-card" onclick="window.location.href='{% url 'plan_bax' aktiv_plan.id %}'">
+            <div class="quick-action-icon">
+                <i class="bi bi-star"></i>
+            </div>
+            <h5 class="quick-action-title">{% trans "İnkişaf Planı" %}</h5>
+            <p class="quick-action-desc">{% trans "Aktiv plan" %}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Recent Activity -->
+            <div class="recent-activity-card">
+                <div class="recent-activity-header">
+                    <h4 class="recent-activity-title">{% trans "Son Fəaliyyətlər" %}</h4>
+                </div>
+                <ul class="recent-activity-list">
+                    {% if qiymetlendirmeler %}
+                        {% for q in qiymetlendirmeler %}
+                        <li class="activity-item">
+                            <div class="activity-content">
+                                <div class="activity-icon activity-icon-primary">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <h6 class="activity-title">{{ q.qiymetlendirilen.get_full_name }}</h6>
+                                    <p class="activity-description">{% trans "Qiymətləndirmə tapşırığı" %} - {{ q.dovr.ad }}</p>
+                                    <small class="activity-time">{{ q.yaradilma_tarixi|timesince }} {% trans "əvvəl" %}</small>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="activity-item">
+                            <div class="activity-content">
+                                <div class="activity-icon activity-icon-success">
+                                    <i class="bi bi-info-circle"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <h6 class="activity-title">{% trans "Fəaliyyət yoxdur" %}</h6>
+                                    <p class="activity-description">{% trans "Hazırda qiymətləndirmə tapşırığınız yoxdur." %}</p>
+                                </div>
+                            </div>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Progress Section -->
+            <div class="progress-section">
+                <h4 class="progress-title">{% trans "İnkişafınız" %}</h4>
+                
+                <div class="progress-item">
+                    <div class="progress-label">
+                        <span class="progress-label-text">{% trans "Tamamlanan qiymətləndirmələr" %}</span>
+                        <span class="progress-label-value">{{ completed_evaluations_count|default:0 }}/{{ total_evaluations_count|default:0 }}</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill progress-bar-primary" 
+                             style="width: {% if total_evaluations_count and total_evaluations_count > 0 %}{{ completed_evaluations_count|floatformat:0|div:total_evaluations_count|mul:100 }}%{% else %}0%{% endif %};">
+                        </div>
+                    </div>
+                </div>
+                
+                {% if is_manager %}
+                <div class="progress-item">
+                    <div class="progress-label">
+                        <span class="progress-label-text">{% trans "Komanda iştirakı" %}</span>
+                        <span class="progress-label-value">{{ team_members_count|default:0 }} {% trans "üzv" %}</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill progress-bar-success" style="width: 85%;"></div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if aktiv_plan %}
+                <div class="progress-item">
+                    <div class="progress-label">
+                        <span class="progress-label-text">{% trans "İnkişaf planı" %}</span>
+                        <span class="progress-label-value">{% trans "Aktiv" %}</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill progress-bar-warning" style="width: 100%;"></div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Animate statistics cards on page load
-        document.querySelectorAll('.modern-card').forEach((card, idx) => {
-            setTimeout(() => card.classList.add('animate__animated', 'animate__fadeInUp'), idx * 120);
-        });
-        // Animate progress bars if any
-        document.querySelectorAll('.modern-progress-bar').forEach(bar => {
-            setTimeout(() => {
-                bar.style.width = bar.getAttribute('aria-valuenow') + '%';
-            }, 500);
-        });
+    // Add any additional JavaScript functionality here
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize any dashboard-specific functionality
+        console.log('Modern dashboard initialized');
     });
 </script>
 {% endblock %}
