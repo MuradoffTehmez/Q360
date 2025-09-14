@@ -279,6 +279,11 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // Define base URLs for AJAX calls
+    // NOTE: The following URL is not found in urls.py and needs to be created:
+    // /participation-monitoring/send-individual-reminder/
+    const sendRemindersUrl = "{% url 'participation_monitoring:send_reminders' 999999 %}".replace('999999', '');
+    
     // Timeline chart
     const timelineCtx = document.getElementById('timelineChart').getContext('2d');
     const timelineChart = new Chart(timelineCtx, {
@@ -308,7 +313,7 @@
     document.querySelector('.reminder-btn')?.addEventListener('click', function() {
         const cycleId = this.getAttribute('data-cycle-id');
         
-        fetch(`/participation-monitoring/send-reminder/${cycleId}/`, {
+        fetch(sendRemindersUrl + cycleId + '/', {
             method: 'POST',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
@@ -331,6 +336,8 @@
             const employeeId = this.getAttribute('data-employee-id');
             const cycleId = this.getAttribute('data-cycle-id');
             
+            // WARNING: This URL is not defined in urls.py
+            // Please create a URL pattern for this endpoint
             fetch(`/participation-monitoring/send-individual-reminder/${cycleId}/${employeeId}/`, {
                 method: 'POST',
                 headers: {

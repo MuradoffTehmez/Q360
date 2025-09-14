@@ -255,12 +255,18 @@
 
 {% block extra_js %}
 <script>
+    // NOTE: The following URLs are not found in urls.py and need to be created:
+    // /idea-bank/approve/ideaId/
+    // /idea-bank/reject/ideaId/
+    
     // Approve idea functionality
     document.querySelectorAll('.approve-btn').forEach(button => {
         button.addEventListener('click', function() {
-            if (confirm('{% trans "Bu ideyanı təsdiqləmək istədiyinizə əminsiniz?" %}')) {
+            if (confirm('{% trans "Bu ideyanı təsdiqləmək istədiyinizə əminsiniz? %}')) {
                 const ideaId = this.getAttribute('data-idea-id');
                 
+                // WARNING: This URL is not defined in urls.py
+                // Please create a URL pattern for this endpoint
                 fetch(`/idea-bank/approve/${ideaId}/`, {
                     method: 'POST',
                     headers: {
@@ -283,9 +289,11 @@
     // Reject idea functionality
     document.querySelectorAll('.reject-btn').forEach(button => {
         button.addEventListener('click', function() {
-            if (confirm('{% trans "Bu ideyanı rədd etmək istədiyinizə əminsiniz?" %}')) {
+            if (confirm('{% trans "Bu ideyanı rədd etmək istədiyinizə əminsiniz? %}')) {
                 const ideaId = this.getAttribute('data-idea-id');
                 
+                // WARNING: This URL is not defined in urls.py
+                // Please create a URL pattern for this endpoint
                 fetch(`/idea-bank/reject/${ideaId}/`, {
                     method: 'POST',
                     headers: {

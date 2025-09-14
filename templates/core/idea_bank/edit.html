@@ -170,6 +170,9 @@
 
 {% block extra_js %}
 <script>
+    // NOTE: The following URL is not found in urls.py and needs to be created:
+    // /idea-bank/delete/ideaId/
+    
     // Form progress tracking
     const form = document.getElementById('ideaForm');
     const inputs = form.querySelectorAll('input, textarea, select');
@@ -220,6 +223,8 @@
         if (confirm('{% trans "Bu ideyanı silmək istədiyinizə əminsiniz?" %}')) {
             const ideaId = this.getAttribute('data-idea-id');
             
+            // WARNING: This URL is not defined in urls.py
+            // Please create a URL pattern for this endpoint
             fetch(`/idea-bank/delete/${ideaId}/`, {
                 method: 'POST',
                 headers: {

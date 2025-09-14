@@ -137,54 +137,86 @@
                         <!-- Main navigation links -->
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'dashboard' %}">
-                                <i class="bi bi-speedometer2 me-1"></i>{% trans "Ana Səhifə" %}
+                                <i class="bi bi-speedometer2 me-1"></i>{% trans
+                                "Ana Səhifə" %}
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'interactive_dashboard' %}">
-                                <i class="bi bi-graph-up me-1"></i>{% trans "İnteraktiv Panel" %}
+                            <a class="nav-link"
+                                href="{% url 'interactive_dashboard' %}">
+                                <i class="bi bi-graph-up me-1"></i>{% trans
+                                "İnteraktiv Panel" %}
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'calendar_view' %}">
-                                <i class="bi bi-calendar-event me-1"></i>{% trans "Təqvim" %}
+                            <a class="nav-link"
+                                href="{% url 'calendar_view' %}">
+                                <i class="bi bi-calendar-event me-1"></i>{%
+                                trans "Təqvim" %}
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'notification_center' %}">
-                                <i class="bi bi-bell me-1"></i>{% trans "Bildirişlər" %}
+                            <a class="nav-link"
+                                href="{% url 'notification_center' %}">
+                                <i class="bi bi-bell me-1"></i>{% trans
+                                "Bildirişlər" %}
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'report_center' %}">
-                                <i class="bi bi-file-bar-graph me-1"></i>{% trans "Hesabatlar" %}
+                            <a class="nav-link"
+                                href="{% url 'report_center' %}">
+                                <i class="bi bi-file-bar-graph me-1"></i>{%
+                                trans "Hesabatlar" %}
                             </a>
                         </li>
-                        
+
                         <!-- New feature links -->
-                        {% if user.rol == 'REHBER' or user.rol == 'ADMIN' or user.is_superuser %}
+                        {% if user.rol == 'REHBER' or user.rol == 'ADMIN' or
+                        user.is_superuser %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-tools me-1"></i>{% trans "İdarəetmə" %}
+                            <a class="nav-link dropdown-toggle" href="#"
+                                id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown">
+                                <i class="bi bi-tools me-1"></i>{% trans
+                                "İdarəetmə" %}
                             </a>
                             <ul class="dropdown-menu">
-                                <li><h6 class="dropdown-header">{% trans "Performans Analizi" %}</h6></li>
-                                <li><a class="dropdown-item" href="{% url 'ai_risk:ai_risk_dashboard' %}">{% trans "AI Risk Analizi" %}</a></li>
-                                <li><a class="dropdown-item" href="{% url 'participation_monitoring:dashboard' %}">{% trans "İştirak Nəzarəti" %}</a></li>
-                                <li><a class="dropdown-item" href="{% url 'gap_analysis:dashboard' %}">{% trans "Fərq Təhlili" %}</a></li>
-                                <li><a class="dropdown-item" href="{% url 'performance_trends:dashboard' %}">{% trans "İnkişaf Trendləri" %}</a></li>
-                                
+                                <li><h6 class="dropdown-header">{% trans
+                                        "Performans Analizi" %}</h6></li>
+                                <li><a class="dropdown-item"
+                                        href="{% url 'ai_risk_dashboard' %}">{%
+                                        trans "AI Risk Analizi" %}</a></li>
+                                <li><a class="dropdown-item"
+                                        href="{% url 'participation_monitoring:dashboard' %}">{%
+                                        trans "İştirak Nəzarəti" %}</a></li>
+                                <li><a class="dropdown-item"
+                                        href="{% url 'gap_analysis:dashboard' %}">{%
+                                        trans "Fərq Təhlili" %}</a></li>
+                                <li><a class="dropdown-item"
+                                        href="{% url 'performance_trends:dashboard' %}">{%
+                                        trans "İnkişaf Trendləri" %}</a></li>
+
                                 <li><hr class="dropdown-divider"></li>
-                                <li><h6 class="dropdown-header">{% trans "İdarəetmə Alətləri" %}</h6></li>
-                                <li><a class="dropdown-item" href="{% url 'private_notes:dashboard' %}">{% trans "Məxfi Qeydlər" %}</a></li>
-                                <li><a class="dropdown-item" href="{% url 'idea_bank:dashboard' %}">{% trans "İdeya Bankı" %}</a></li>
-                                <li><a class="dropdown-item" href="{% url 'quick_feedback:dashboard' %}">{% trans "Sürətli Geri Bildirim" %}</a></li>
-                                <li><a class="dropdown-item" href="{% url 'self_review:dashboard' %}">{% trans "Öz Qiymətləndirmə" %}</a></li>
+                                <li><h6 class="dropdown-header">{% trans
+                                        "İdarəetmə Alətləri" %}</h6></li>
+                                <li><a class="dropdown-item"
+                                        href="{% url 'private_notes:dashboard' %}">{%
+                                        trans "Məxfi Qeydlər" %}</a></li>
+                                <li><a class="dropdown-item"
+                                        href="{% url 'idea_bank:dashboard' %}">{%
+                                        trans "İdeya Bankı" %}</a></li>
+                                <li><a class="dropdown-item"
+                                        href="{% url 'quick_feedback:dashboard' %}">{%
+                                        trans "Sürətli Geri Bildirim"
+                                        %}</a></li>
+                                <li><a class="dropdown-item"
+                                        href="{% url 'self_review:dashboard' %}">{%
+                                        trans "Öz Qiymətləndirmə" %}</a></li>
                             </ul>
                         </li>
                         {% endif %}
                     </ul>
-                    
+
                     <ul class="navbar-nav ms-auto align-items-center gap-2">
                         <!-- Theme toggle -->
                         <li class="nav-item">
@@ -206,7 +238,8 @@
                         <!-- User menu -->
                         <li
                             class="nav-item dropdown animate__animated animate__fadeIn">
-                            <a  class="nav-link dropdown-toggle d-flex align-items-center"
+                            <a
+                                class="nav-link dropdown-toggle d-flex align-items-center"
                                 href="#" id="userDropdown"
                                 role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false"
@@ -223,39 +256,49 @@
                                     <i class="bi bi-person-fill"></i>
                                 </div>
                                 {% endif %}
-                                <span class="fw-semibold d-none d-md-inline">{{ user.get_full_name|default:user.username|truncatechars:15 }}</span>
+                                <span class="fw-semibold d-none d-md-inline">{{
+                                    user.get_full_name|default:user.username|truncatechars:15
+                                    }}</span>
                             </a>
                             <ul
                                 class="dropdown-menu dropdown-menu-end animate__animated animate__fadeIn"
                                 aria-labelledby="userDropdown">
                                 <li>
-                                    <h6 class="dropdown-header">{% trans "Salam" %}, {{ user.get_full_name|default:user.username }}</h6>
+                                    <h6 class="dropdown-header">{% trans "Salam"
+                                        %}, {{
+                                        user.get_full_name|default:user.username
+                                        }}</h6>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li><a class="dropdown-item"
                                         href="{% url 'profil' %}">
-                                        <i class="bi bi-person me-2"></i>{% trans "Profilim" %}
+                                        <i class="bi bi-person me-2"></i>{%
+                                        trans "Profilim" %}
                                     </a></li>
                                 <li><a class="dropdown-item"
                                         href="{% url 'hesabatim' %}">
                                         <i
-                                            class="bi bi-file-earmark-text me-2"></i>{% trans "Hesabatım" %}
+                                            class="bi bi-file-earmark-text me-2"></i>{%
+                                        trans "Hesabatım" %}
                                     </a></li>
-                                {% if user.rol == 'REHBER' or user.is_superuser %}
+                                {% if user.rol == 'REHBER' or user.is_superuser
+                                %}
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li><a class="dropdown-item"
                                         href="{% url 'rehber_paneli' %}">
-                                        <i class="bi bi-people me-2"></i>{% trans "Rəhbər Paneli" %}
+                                        <i class="bi bi-people me-2"></i>{%
+                                        trans "Rəhbər Paneli" %}
                                     </a></li>
                                 {% endif %}
                                 {% if user.is_superuser %}
                                 <li><a class="dropdown-item"
                                         href="{% url 'superadmin_paneli' %}">
-                                        <i class="bi bi-gear me-2"></i>{% trans "Superadmin Paneli" %}
+                                        <i class="bi bi-gear me-2"></i>{% trans
+                                        "Superadmin Paneli" %}
                                     </a></li>
                                 {% endif %}
                                 <li>
@@ -268,7 +311,8 @@
                                         <button type="submit"
                                             class="dropdown-item text-danger">
                                             <i
-                                                class="bi bi-box-arrow-right me-2"></i>{% trans "Çıxış" %}
+                                                class="bi bi-box-arrow-right me-2"></i>{%
+                                            trans "Çıxış" %}
                                         </button>
                                     </form>
                                 </li>
@@ -279,7 +323,8 @@
                         <li class="nav-item animate__animated animate__fadeIn">
                             <a class="btn btn-primary btn-sm px-4 rounded-pill"
                                 href="{% url 'login' %}">
-                                <i class="bi bi-box-arrow-in-right me-1"></i>{% trans "Daxil Ol" %}
+                                <i class="bi bi-box-arrow-in-right me-1"></i>{%
+                                trans "Daxil Ol" %}
                             </a>
                         </li>
                         {% endif %}
@@ -412,7 +457,8 @@
                     <div class="col-md-6">
                         <p class="text-muted small mb-0">
                             {% trans "Bütün hüquqlar qorunur" %} &copy; {% now
-                            "Y" %} {% trans "Qiymətləndirmə Sistemi" %}
+                            "Y" %} {% trans
+                            "Qiymətləndirmə Sistemi - MURADOV TAHMAZ" %}
                         </p>
                     </div>
                     <div class="col-md-6 text-md-end">

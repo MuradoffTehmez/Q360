@@ -131,6 +131,9 @@
 
 {% block extra_js %}
 <script>
+    // Define base URL for AJAX calls
+    const autoSaveUrl = "{% url 'self_review:auto_save' %}";
+    
     // Auto-save functionality
     let autoSaveTimer;
     
@@ -139,7 +142,7 @@
         autoSaveTimer = setTimeout(function() {
             // Auto-save AJAX call
             const formData = new FormData(document.getElementById('selfReviewForm'));
-            fetch("{% url 'self_review:auto_save' %}", {
+            fetch(autoSaveUrl, {
                 method: 'POST',
                 body: formData,
                 headers: {

@@ -225,13 +225,20 @@
 
 {% block extra_js %}
 <script>
+    // Define base URL for AJAX calls
+    const voteUrl = "{% url 'idea_bank:vote' 999999 %}".replace('999999', '');
+    
+    // NOTE: The following URLs are not found in urls.py and need to be created:
+    // /idea-bank/approve/ideaId/
+    // /idea-bank/comment/commentId/delete/
+    
     // Vote functionality
     document.querySelectorAll('.vote-btn').forEach(button => {
         button.addEventListener('click', function() {
             const ideaId = this.getAttribute('data-idea-id');
             const voteType = this.getAttribute('data-vote-type');
             
-            fetch(`/idea-bank/vote/${ideaId}/`, {
+            fetch(voteUrl + ideaId + '/', {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
@@ -254,6 +261,8 @@
     document.querySelector('.approve-btn')?.addEventListener('click', function() {
         const ideaId = this.getAttribute('data-idea-id');
         
+        // WARNING: This URL is not defined in urls.py
+        // Please create a URL pattern for this endpoint
         fetch(`/idea-bank/approve/${ideaId}/`, {
             method: 'POST',
             headers: {
@@ -277,6 +286,8 @@
             if (confirm('{% trans "Şərhi silmək istədiyinizə əminsiniz?" %}')) {
                 const commentId = this.getAttribute('data-comment-id');
                 
+                // WARNING: This URL is not defined in urls.py
+                // Please create a URL pattern for this endpoint
                 fetch(`/idea-bank/comment/${commentId}/delete/`, {
                     method: 'POST',
                     headers: {

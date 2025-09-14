@@ -246,6 +246,9 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // Define base URL for AJAX calls
+    const sendRemindersUrl = "{% url 'participation_monitoring:send_reminders' 999999 %}".replace('999999', '');
+    
     // Trend chart
     const trendCtx = document.getElementById('trendChart').getContext('2d');
     const trendChart = new Chart(trendCtx, {
@@ -318,7 +321,7 @@
         button.addEventListener('click', function() {
             const cycleId = this.getAttribute('data-cycle-id');
             
-            fetch(`/participation-monitoring/send-reminder/${cycleId}/`, {
+            fetch(sendRemindersUrl + cycleId + '/', {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
