@@ -1,0 +1,58 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Təqvim" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Təqvim" %}</h2>
+        <p>{% trans "Qiymətləndirmə dövrləri və hadisələr." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Filtr" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">{% trans "Tarix Aralığı" %}</label>
+                    <input type="date" class="form-control">
+                    <input type="date" class="form-control mt-2">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">{% trans "Kateqoriya" %}</label>
+                    <select class="form-select">
+                        <option>{% trans "Bütün Kateqoriyalar" %}</option>
+                        <option>{% trans "Qiymətləndirmə Dövrləri" %}</option>
+                        <option>{% trans "Məsləhətləşmələr" %}</option>
+                        <option>{% trans "Təlimlər" %}</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary w-100">{% trans "Filtr" %}</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">{% trans "Təqvim" %}</h5>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary me-2">{% trans "Gün" %}</button>
+                    <button class="btn btn-sm btn-primary me-2">{% trans "Həftə" %}</button>
+                    <button class="btn btn-sm btn-outline-primary">{% trans "Ay" %}</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="calendar">
+                    <p>{% trans "Burada təqvim olacaq." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

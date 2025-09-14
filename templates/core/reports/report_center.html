@@ -1,0 +1,58 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Hesabat Mərkəzi" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Hesabat Mərkəzi" %}</h2>
+        <p>{% trans "Sistemdə olan bütün hesabatları buradan əldə edə bilərsiniz." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "İşçi Hesabatları" %}</h5>
+                <p class="card-text">{% trans "Fərdi işçilərin qiymətləndirmə hesabatlarını əldə edin." %}</p>
+                <a href="#" class="btn btn-primary">{% trans "Bax" %}</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Departament Hesabatları" %}</h5>
+                <p class="card-text">{% trans "Departamentlərin ümumi performans hesabatlarını əldə edin." %}</p>
+                <a href="#" class="btn btn-primary">{% trans "Bax" %}</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Dövr Hesabatları" %}</h5>
+                <p class="card-text">{% trans "Qiymətləndirmə dövrlərinin ümumi statistikasını əldə edin." %}</p>
+                <a href="#" class="btn btn-primary">{% trans "Bax" %}</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ən Son Hesabatlar" %}</h5>
+            </div>
+            <div class="card-body">
+                <p>{% trans "Burada ən son yaradılmış hesabatlar siyahısı olacaq." %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
