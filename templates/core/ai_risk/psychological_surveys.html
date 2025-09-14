@@ -1,0 +1,147 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Psixoloji Anketlər" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Psixoloji Anketlər" %}</h2>
+        <p>{% trans "İşçilərin psixoloji sağlamlığını və məntəqi qiymətləndirin." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Aktiv Anketlər" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if active_surveys %}
+                    <div class="row">
+                        {% for survey in active_surveys %}
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ survey.title }}</h5>
+                                    <p class="card-text">{{ survey.get_survey_type_display }}</p>
+                                    <p class="card-text"><small class="text-muted">{{ survey.questions|length }} sual</small></p>
+                                    <a href="#" class="btn btn-primary">
+                                        {% trans "Anketə Başla" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda aktiv anket yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Statistikalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Aktiv Anketlər" %}</span>
+                            <strong>{{ active_surveys|length }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Cavab Verilmiş" %}</span>
+                            <strong>{{ user_responses|length }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ortalama Skor" %}</span>
+                            <strong>
+                                {% if user_responses %}
+                                    {% widthratio user_responses|sum:"total_score" user_responses|length 1 %}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Cavab Verilmiş Anketlər" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if user_responses %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Anket" %}</th>
+                                    <th>{% trans "Tarix" %}</th>
+                                    <th>{% trans "Skor" %}</th>
+                                    <th>{% trans "Risk Səviyyəsi" %}</th>
+                                    <th>{% trans "Əməliyyat" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for response in user_responses %}
+                                <tr>
+                                    <td>{{ response.survey.title }}</td>
+                                    <td>{{ response.responded_at|date:"d.m.Y" }}</td>
+                                    <td>{{ response.total_score }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if response.risk_level == 'LOW' %}success{% elif response.risk_level == 'MEDIUM' %}warning{% elif response.risk_level == 'HIGH' %}danger{% else %}secondary{% endif %}">
+                                            {{ response.get_risk_level_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-primary">
+                                            {% trans "Detallı Bax" %}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda cavab verilmiş anket yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Tövsiyələr" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>{% trans "Psixoloji anketləri müntəzəm olaraq doldurun" %}</li>
+                    <li>{% trans "Nəticələri HR şöbəsi ilə paylaşın" %}</li>
+                    <li>{% trans "Lazım olduqda mütəxəssislərə müraciət edin" %}</li>
+                    <li>{% trans "Məntəqi sağlamlığını qoruyun" %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

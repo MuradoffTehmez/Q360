@@ -1,0 +1,299 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{{ idea.basliq }} - {% trans "İdeya Detalları" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'idea_bank:dashboard' %}">{% trans "İdeya Bankı" %}</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {{ idea.basliq|truncatewords:5 }}
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h2>{{ idea.basliq }}</h2>
+        <p>{% trans "İdeya detalları və müzakirələr." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "İdeya Məzmunu" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <div>
+                        <strong>{% trans "Paylaşan:" %}</strong> 
+                        {{ idea.author.get_full_name }}
+                        <br>
+                        <strong>{% trans "Kateqoriya:" %}</strong> 
+                        <span class="badge bg-secondary">{{ idea.category.name }}</span>
+                    </div>
+                    <div class="text-end">
+                        <strong>{% trans "Tarix:" %}</strong> 
+                        {{ idea.created_at|date:"d.m.Y H:i" }}
+                        <br>
+                        <span class="badge bg-{% if idea.status == 'YENI' %}primary{% elif idea.status == 'TESDIQLENMIS' %}success{% elif idea.status == 'TESDIQSIZ' %}danger{% else %}secondary{% endif %}">
+                            {{ idea.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>{% trans "Təsvir" %}</h5>
+                    <p>{{ idea.description|linebreaks }}</p>
+                </div>
+                
+                {% if idea.benefits %}
+                <div class="mb-4">
+                    <h5>{% trans "Faydalar" %}</h5>
+                    <p>{{ idea.benefits|linebreaks }}</p>
+                </div>
+                {% endif %}
+                
+                {% if idea.implementation_steps %}
+                <div class="mb-4">
+                    <h5>{% trans "Həyata Keçirmə Addımları" %}</h5>
+                    <p>{{ idea.implementation_steps|linebreaks }}</p>
+                </div>
+                {% endif %}
+                
+                {% if idea.resources_needed %}
+                <div class="mb-4">
+                    <h5>{% trans "Lazım Olan Resurslar" %}</h5>
+                    <p>{{ idea.resources_needed|linebreaks }}</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <button class="btn btn-outline-success vote-btn me-2" 
+                                data-idea-id="{{ idea.id }}" 
+                                data-vote-type="up">
+                            <i class="fas fa-thumbs-up me-1"></i>
+                            {% trans "Bəyən" %} ({{ idea.upvotes }})
+                        </button>
+                        <button class="btn btn-outline-danger vote-btn" 
+                                data-idea-id="{{ idea.id }}" 
+                                data-vote-type="down">
+                            <i class="fas fa-thumbs-down me-1"></i>
+                            {% trans "Bəyənmə" %} ({{ idea.downvotes }})
+                        </button>
+                    </div>
+                    <div>
+                        {% if idea.author == user %}
+                        <a href="{% url 'idea_bank:edit' idea.id %}" class="btn btn-warning">
+                            <i class="fas fa-edit me-1"></i>
+                            {% trans "Redaktə et" %}
+                        </a>
+                        {% endif %}
+                        {% if user.rol in 'ADMIN,SUPERADMIN' %}
+                        <button class="btn btn-success approve-btn" data-idea-id="{{ idea.id }}">
+                            <i class="fas fa-check me-1"></i>
+                            {% trans "Təsdiqlə" %}
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Şərhlər" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if comments %}
+                    <div class="list-group">
+                        {% for comment in comments %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ comment.author.get_full_name }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+                                </div>
+                                <div class="text-end">
+                                    {% if comment.author == user %}
+                                    <button class="btn btn-sm btn-outline-danger delete-comment" 
+                                            data-comment-id="{{ comment.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <p class="mt-2 mb-0">{{ comment.content|linebreaks }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hələ şərh yoxdur. İlk şərhi siz yazın!" %}</p>
+                {% endif %}
+                
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="commentContent" class="form-label">{% trans "Şərh yazın" %}</label>
+                        <textarea class="form-control" id="commentContent" name="content" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-1"></i>
+                        {% trans "Göndər" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "İdeya Statistikası" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Bəyənmələr" %}</span>
+                            <strong>{{ idea.upvotes }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Bəyənməmələr" %}</span>
+                            <strong>{{ idea.downvotes }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Şərhlər" %}</span>
+                            <strong>{{ idea.comments.count }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Status" %}</span>
+                            <strong>
+                                <span class="badge bg-{% if idea.status == 'YENI' %}primary{% elif idea.status == 'TESDIQLENMIS' %}success{% elif idea.status == 'TESDIQSIZ' %}danger{% else %}secondary{% endif %}">
+                                    {{ idea.get_status_display }}
+                                </span>
+                            </strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Əlaqəli İdeyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if related_ideas %}
+                    <div class="list-group">
+                        {% for related in related_ideas %}
+                        <a href="{% url 'idea_bank:detail' related.id %}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between">
+                                <span>{{ related.basliq|truncatewords:5 }}</span>
+                                <span class="badge bg-success">{{ related.upvotes }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Əlaqəli ideya yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Vote functionality
+    document.querySelectorAll('.vote-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const ideaId = this.getAttribute('data-idea-id');
+            const voteType = this.getAttribute('data-vote-type');
+            
+            fetch(`/idea-bank/vote/${ideaId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({vote_type: voteType})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error || '{% trans "Səhv baş verdi" %}');
+                }
+            });
+        });
+    });
+    
+    // Approve functionality
+    document.querySelector('.approve-btn')?.addEventListener('click', function() {
+        const ideaId = this.getAttribute('data-idea-id');
+        
+        fetch(`/idea-bank/approve/${ideaId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error || '{% trans "Səhv baş verdi" %}');
+            }
+        });
+    });
+    
+    // Delete comment functionality
+    document.querySelectorAll('.delete-comment').forEach(button => {
+        button.addEventListener('click', function() {
+            if (confirm('{% trans "Şərhi silmək istədiyinizə əminsiniz?" %}')) {
+                const commentId = this.getAttribute('data-comment-id');
+                
+                fetch(`/idea-bank/comment/${commentId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.error || '{% trans "Səhv baş verdi" %}');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

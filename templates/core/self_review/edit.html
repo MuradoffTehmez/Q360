@@ -1,0 +1,190 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Öz Qiymətləndirmə Formu" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{{ cycle.ad }} - {% trans "Öz Qiymətləndirmə Formu" %}</h2>
+        <p>{% trans "Özünüzü dürüst şəkildə qiymətləndirin." %}</p>
+    </div>
+</div>
+
+<form method="post" id="selfReviewForm">
+    {% csrf_token %}
+    <input type="hidden" name="cycle_id" value="{{ cycle.id }}">
+    
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Kateqoriyalar" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% for category in categories %}
+                    <div class="mb-5 category-section" data-category-id="{{ category.id }}">
+                        <h4>{{ category.ad }}</h4>
+                        <p class="text-muted">{{ category.description }}</p>
+                        
+                        {% for question in category.questions %}
+                        <div class="mb-4 question-item" data-question-id="{{ question.id }}">
+                            <h6>{{ question.metn }}</h6>
+                            <div class="rating-options">
+                                {% for i in "12345" %}
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input rating-input" 
+                                           type="radio" 
+                                           name="question_{{ question.id }}" 
+                                           id="question_{{ question.id }}_{{ i }}" 
+                                           value="{{ i }}"
+                                           {% if question.user_answer and question.user_answer.xal == i %}checked{% endif %}
+                                           required>
+                                    <label class="form-check-label" for="question_{{ question.id }}_{{ i }}">
+                                        {{ i }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            {% if question.requires_comment %}
+                            <div class="mt-2">
+                                <label for="comment_{{ question.id }}" class="form-label">
+                                    {% trans "Şərh (vacib)" %}
+                                </label>
+                                <textarea class="form-control" 
+                                          name="comment_{{ question.id }}" 
+                                          id="comment_{{ question.id }}" 
+                                          rows="2"
+                                          {% if question.requires_comment %}required{% endif %}>{{ question.user_answer.metnli_rey|default:"" }}</textarea>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Təlimatlar" %}</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>{% trans "Hər suala 1-5 arası qiymət verin (1 - çox zəif, 5 - mükəmməl)" %}</li>
+                        <li>{% trans "Özünüzü dürüst qiymətləndirin" %}</li>
+                        <li>{% trans "Şərhlər yazmaq faydalıdır" %}</li>
+                        <li>{% trans "Formu tamamladıqdan sonra yadda saxlayın" %}</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Əməliyyatlar" %}</h5>
+                </div>
+                <div class="card-body">
+                    <button type="submit" name="action" value="save" class="btn btn-primary w-100 mb-2">
+                        <i class="fas fa-save me-1"></i>
+                        {% trans "Yadda Saxla" %}
+                    </button>
+                    <button type="submit" name="action" value="complete" class="btn btn-success w-100 mb-2">
+                        <i class="fas fa-check-circle me-1"></i>
+                        {% trans "Tamamla" %}
+                    </button>
+                    <a href="{% url 'self_review:dashboard' %}" class="btn btn-secondary w-100">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        {% trans "Ləğv et" %}
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "İrəliləyiş" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress">
+                        <div class="progress-bar" 
+                             role="progressbar" 
+                             style="width: {{ progress }}%" 
+                             aria-valuenow="{{ progress }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ progress }}%
+                        </div>
+                    </div>
+                    <p class="mt-2 text-center">
+                        {% blocktrans with answered=answered_questions total=total_questions %}
+                        {{ answered }}/{{ total }} suala cavab verilib
+                        {% endblocktrans %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-save functionality
+    let autoSaveTimer;
+    
+    function startAutoSave() {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(function() {
+            // Auto-save AJAX call
+            const formData = new FormData(document.getElementById('selfReviewForm'));
+            fetch("{% url 'self_review:auto_save' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Auto-saved successfully');
+                }
+            });
+        }, 30000); // Save every 30 seconds
+    }
+    
+    // Start auto-save when user starts typing
+    document.querySelectorAll('input, textarea').forEach(element => {
+        element.addEventListener('input', startAutoSave);
+    });
+    
+    // Progress tracking
+    document.querySelectorAll('.rating-input').forEach(input => {
+        input.addEventListener('change', function() {
+            // Update progress bar
+            const answered = document.querySelectorAll('.rating-input:checked').length;
+            const total = document.querySelectorAll('.rating-input').length / 5; // 5 options per question
+            const progress = Math.round((answered / total) * 100);
+            
+            document.querySelector('.progress-bar').style.width = progress + '%';
+            document.querySelector('.progress-bar').textContent = progress + '%';
+            document.querySelector('.progress-bar').setAttribute('aria-valuenow', progress);
+        });
+    });
+    
+    // Form submission handling
+    document.getElementById('selfReviewForm').addEventListener('submit', function(e) {
+        // Clear auto-save timer
+        clearTimeout(autoSaveTimer);
+        
+        // Show loading indicator
+        const submitButtons = document.querySelectorAll('button[type="submit"]');
+        submitButtons.forEach(button => {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>' + button.textContent;
+        });
+    });
+</script>
+{% endblock %}

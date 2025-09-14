@@ -1,0 +1,215 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Şöbələr Arası Müqayisə" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Şöbələr Arası Müqayisə" %}</h2>
+        <p>{% trans "Şöbələr arasında performans müqayisəsi edin." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Filtrlər" %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="get">
+                    <div class="mb-3">
+                        <label for="cycle" class="form-label">{% trans "Dövr" %}</label>
+                        <select name="cycle" id="cycle" class="form-select">
+                            {% for cycle in cycles %}
+                            <option value="{{ cycle.id }}" {% if request.GET.cycle == cycle.id|stringformat:"i" %}selected{% endif %}>
+                                {{ cycle.ad }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="departments" class="form-label">{% trans "Şöbələr" %}</label>
+                        <select name="departments" id="departments" class="form-select" multiple>
+                            {% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if dept.id|stringformat:"i" in request.GET.departments %}selected{% endif %}>
+                                {{ dept.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mb-2">
+                        <i class="fas fa-filter me-1"></i>
+                        {% trans "Filtrlə" %}
+                    </button>
+                    <a href="{% url 'performance_trends:department_comparison' %}" class="btn btn-secondary w-100">
+                        <i class="fas fa-times me-1"></i>
+                        {% trans "Təmizlə" %}
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Şöbələr Arası Performans Müqayisəsi" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="comparisonChart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Şöbə Əsasında Statistikalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Şöbə" %}</th>
+                                <th>{% trans "Ortalama Skor" %}</th>
+                                <th>{% trans "İşçi Sayı" %}</th>
+                                <th>{% trans "Trend" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dept in department_stats %}
+                            <tr>
+                                <td>{{ dept.department.name }}</td>
+                                <td>{{ dept.average_score|floatformat:1 }}</td>
+                                <td>{{ dept.employee_count }}</td>
+                                <td>
+                                    {% if dept.trend == 'increasing' %}
+                                        <span class="text-success">{% trans "Artır" %}</span>
+                                    {% elif dept.trend == 'decreasing' %}
+                                        <span class="text-danger">{% trans "Azalır" %}</span>
+                                    {% else %}
+                                        <span class="text-muted">{% trans "Stabil" %}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ən Yaxşı Şöbələr" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if top_departments %}
+                    <div class="list-group">
+                        {% for dept in top_departments %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">{{ dept.department.name }}</h6>
+                                <span class="badge bg-success">{{ dept.average_score|floatformat:1 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">
+                                    {% trans "İşçi sayı:" %} {{ dept.employee_count }}
+                                </small>
+                                <small class="text-muted">
+                                    {% if dept.trend == 'increasing' %}
+                                        <span class="text-success">{% trans "Artır" %}</span>
+                                    {% elif dept.trend == 'decreasing' %}>
+                                        <span class="text-danger">{% trans "Azalır" %}</span>
+                                    {% else %}
+                                        <span class="text-muted">{% trans "Stabil" %}</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda məlumat yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Analiz" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6>{% trans "Ən Yaxşı Performans" %}</h6>
+                        <p>
+                            {% trans "Ən yaxşı performans göstərən şöbələr." %}
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>{% trans "Tövsiyələr" %}</h6>
+                        <ul>
+                            <li>{% trans "Yaxşı performans göstərən şöbələrin təcrübəsini paylaşın" %}</li>
+                            <li>{% trans "Az performans göstərən şöbələr üçün tədbirlər planlayın" %}</li>
+                            <li>{% trans "Şöbələr arasında əməkdaşlıq təşkil edin" %}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>{% trans "Növbəti Addımlar" %}</h6>
+                        <ul>
+                            <li>{% trans "Hər şöbə üçün fərdi inkişaf planları hazırlayın" %}</li>
+                            <li>{% trans "Müntəzəm olaraq performansı izləyin" %}</li>
+                            <li>{% trans "Şöbə rəhbərləri ilə fərdi görüşlər keçirin" %}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Comparison chart
+    const compCtx = document.getElementById('comparisonChart').getContext('2d');
+    const comparisonChart = new Chart(compCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_data.departments|safe }},
+            datasets: [{
+                label: '{% trans "Ortalama Skor" %}',
+                data: {{ chart_data.scores|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

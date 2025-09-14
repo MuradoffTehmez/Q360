@@ -1,0 +1,179 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Göndərilən Geri Bildirimlər" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Göndərilən Geri Bildirimlər" %}</h2>
+        <p>{% trans "Siz tərəfindən göndərilən bütün geri bildirimlər." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Filtrlər" %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="get">
+                    <div class="mb-3">
+                        <label for="feedback_type" class="form-label">{% trans "Tip" %}</label>
+                        <select name="feedback_type" id="feedback_type" class="form-select">
+                            <option value="">{% trans "Hamısı" %}</option>
+                            <option value="POSITIVE" {% if request.GET.feedback_type == 'POSITIVE' %}selected{% endif %}>{% trans "Müsbət" %}</option>
+                            <option value="NEGATIVE" {% if request.GET.feedback_type == 'NEGATIVE' %}selected{% endif %}>{% trans "Mənfi" %}</option>
+                            <option value="NEUTRAL" {% if request.GET.feedback_type == 'NEUTRAL' %}selected{% endif %}>{% trans "Neytral" %}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">{% trans "Prioritet" %}</label>
+                        <select name="priority" id="priority" class="form-select">
+                            <option value="">{% trans "Hamısı" %}</option>
+                            <option value="LOW" {% if request.GET.priority == 'LOW' %}selected{% endif %}>{% trans "Aşağı" %}</option>
+                            <option value="MEDIUM" {% if request.GET.priority == 'MEDIUM' %}selected{% endif %}>{% trans "Orta" %}</option>
+                            <option value="HIGH" {% if request.GET.priority == 'HIGH' %}selected{% endif %}>{% trans "Yüksək" %}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="category" class="form-label">{% trans "Kateqoriya" %}</label>
+                        <select name="category" id="category" class="form-select">
+                            <option value="">{% trans "Hamısı" %}</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"i" %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mb-2">
+                        <i class="fas fa-filter me-1"></i>
+                        {% trans "Filtrlə" %}
+                    </button>
+                    <a href="{% url 'quick_feedback:sent' %}" class="btn btn-secondary w-100">
+                        <i class="fas fa-times me-1"></i>
+                        {% trans "Təmizlə" %}
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Göndərilən Geri Bildirimlər" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if feedbacks %}
+                    <div class="list-group">
+                        {% for feedback in feedbacks %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <a href="{% url 'quick_feedback:view' feedback.id %}">
+                                            {{ feedback.title }}
+                                        </a>
+                                    </h6>
+                                    <p class="mb-1">{{ feedback.message|truncatewords:20 }}</p>
+                                    <div class="d-flex">
+                                        <small class="text-muted me-3">
+                                            <i class="fas fa-user me-1"></i>
+                                            {{ feedback.to_user.get_full_name }}
+                                        </small>
+                                        <small class="text-muted me-3">
+                                            <i class="fas fa-tag me-1"></i>
+                                            {{ feedback.category.name }}
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            {{ feedback.created_at|timesince }} {% trans "əvvəl" %}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="mb-2">
+                                        <span class="badge bg-{% if feedback.feedback_type == 'POSITIVE' %}success{% elif feedback.feedback_type == 'NEGATIVE' %}danger{% else %}secondary{% endif %} me-1">
+                                            {{ feedback.get_feedback_type_display }}
+                                        </span>
+                                        <span class="badge bg-{% if feedback.priority == 'LOW' %}success{% elif feedback.priority == 'MEDIUM' %}warning{% elif feedback.priority == 'HIGH' %}danger{% else %}secondary{% endif %}">
+                                            {{ feedback.get_priority_display }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        {% if feedback.is_read %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>
+                                                {% trans "Oxunub" %}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock me-1"></i>
+                                                {% trans "Oxunmamış" %}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-paper-plane fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">{% trans "Göndərilən geri bildirim yoxdur" %}</h5>
+                        <p class="text-muted">{% trans "Geri bildirim göndərdikdə burada görünəcək." %}</p>
+                        <a href="{% url 'quick_feedback:send' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>
+                            {% trans "Yeni geri bildirim göndər" %}
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

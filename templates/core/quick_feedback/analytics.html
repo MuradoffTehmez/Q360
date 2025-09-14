@@ -1,0 +1,254 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Geri Bildirim Analitikası" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Geri Bildirim Analitikası" %}</h2>
+        <p>{% trans "Geri bildirimlərin statistikası və trendləri." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Ümumi Geri Bildirim" %}</h5>
+                <h2>{{ stats.total_feedback }}</h2>
+                <p class="mb-0">{% trans "Bütün geri bildirimlər" %}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Müsbət" %}</h5>
+                <h2>{{ stats.positive_feedback }}</h2>
+                <p class="mb-0">{{ stats.positive_percentage|floatformat:1 }}%</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Mənfi" %}</h5>
+                <h2>{{ stats.negative_feedback }}</h2>
+                <p class="mb-0">{{ stats.negative_percentage|floatformat:1 }}%</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Orta Cevab Verilmə" %}</h5>
+                <h2>{{ stats.average_response_time|floatformat:1 }}</h2>
+                <p class="mb-0">{% trans "saat" %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Zaman Əsasında Trendlər" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="trendChart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Kateqoriyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ən Aktiv İstifadəçilər" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{% trans "İstifadəçi" %}</th>
+                                <th>{% trans "Göndərilən" %}</th>
+                                <th>{% trans "Alınan" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in top_users %}
+                            <tr>
+                                <td>{{ user.user.get_full_name }}</td>
+                                <td>{{ user.sent_count }}</td>
+                                <td>{{ user.received_count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Prioritetlər" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Prioritet" %}</th>
+                                <th>{% trans "Say" %}</th>
+                                <th>{% trans "Faiz" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{% trans "Aşağı" %}</td>
+                                <td>{{ priority_stats.low }}</td>
+                                <td>{{ priority_stats.low_percentage|floatformat:1 }}%</td>
+                            </tr>
+                            <tr>
+                                <td>{% trans "Orta" %}</td>
+                                <td>{{ priority_stats.medium }}</td>
+                                <td>{{ priority_stats.medium_percentage|floatformat:1 }}%</td>
+                            </tr>
+                            <tr>
+                                <td>{% trans "Yüksək" %}</td>
+                                <td>{{ priority_stats.high }}</td>
+                                <td>{{ priority_stats.high_percentage|floatformat:1 }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ən Çox İstifadə Olunan Kateqoriyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for category in top_categories %}
+                    <div class="col-md-3 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <i class="{{ category.category.icon }} fa-2x mb-2"></i>
+                                <h6>{{ category.category.name }}</h6>
+                                <h3>{{ category.count }}</h3>
+                                <p class="text-muted mb-0">{% trans "geri bildirim" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Trend chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: {{ trend_data.dates|safe }},
+            datasets: [
+                {
+                    label: '{% trans "Ümumi Geri Bildirim" %}',
+                    data: {{ trend_data.total|safe }},
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    fill: false
+                },
+                {
+                    label: '{% trans "Müsbət" %}',
+                    data: {{ trend_data.positive|safe }},
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: false
+                },
+                {
+                    label: '{% trans "Mənfi" %}',
+                    data: {{ trend_data.negative|safe }},
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Category chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryChart = new Chart(categoryCtx, {
+        type: 'pie',
+        data: {
+            labels: [{% for cat in category_stats %}"{{ cat.category.name }}",{% endfor %}],
+            datasets: [{
+                data: [{% for cat in category_stats %}{{ cat.count }},{% endfor %}],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 205, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+</script>
+{% endblock %}

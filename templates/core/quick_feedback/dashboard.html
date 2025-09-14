@@ -1,0 +1,190 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Sürətli Geri Bildirim" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Sürətli Geri Bildirim" %}</h2>
+        <p>{% trans "Rəsmi qiymətləndirmə dövrləri arasında sürətli geri bildirim sistemi." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-paper-plane fa-2x text-primary mb-2"></i>
+                <h5>{% trans "Göndər" %}</h5>
+                <p class="text-muted">{% trans "Yeni geri bildirim göndərin" %}</p>
+                <a href="{% url 'quick_feedback:send' %}" class="btn btn-primary btn-sm">
+                    {% trans "Göndər" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-inbox fa-2x text-success mb-2"></i>
+                <h5>{% trans "Gələnlər" %}</h5>
+                <p class="text-muted">{% trans "Alınan geri bildirimlər" %}</p>
+                <a href="{% url 'quick_feedback:inbox' %}" class="btn btn-success btn-sm">
+                    {% trans "Bax" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-paper-plane fa-2x text-info mb-2"></i>
+                <h5>{% trans "Göndərilən" %}</h5>
+                <p class="text-muted">{% trans "Göndərilmiş geri bildirimlər" %}</p>
+                <a href="{% url 'quick_feedback:sent' %}" class="btn btn-info btn-sm">
+                    {% trans "Bax" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-2x text-warning mb-2"></i>
+                <h5>{% trans "Analitika" %}</h5>
+                <p class="text-muted">{% trans "Geri bildirim statistikası" %}</p>
+                <a href="{% url 'quick_feedback:analytics' %}" class="btn btn-warning btn-sm">
+                    {% trans "Bax" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Son Alınan Geri Bildirimlər" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if received_feedbacks %}
+                    <div class="list-group">
+                        {% for feedback in received_feedbacks %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">{{ feedback.title }}</h6>
+                                <span class="badge bg-{% if feedback.feedback_type == 'POSITIVE' %}success{% elif feedback.feedback_type == 'NEGATIVE' %}danger{% else %}secondary{% endif %}">
+                                    {{ feedback.get_feedback_type_display }}
+                                </span>
+                            </div>
+                            <p class="mb-1">{{ feedback.message|truncatewords:15 }}</p>
+                            <small class="text-muted">
+                                {{ feedback.from_user.get_full_name }} | {{ feedback.created_at|timesince }} əvvəl
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda alınan geri bildirim yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Son Göndərilən Geri Bildirimlər" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if given_feedbacks %}
+                    <div class="list-group">
+                        {% for feedback in given_feedbacks %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">{{ feedback.title }}</h6>
+                                <span class="badge bg-{% if feedback.feedback_type == 'POSITIVE' %}success{% elif feedback.feedback_type == 'NEGATIVE' %}danger{% else %}secondary{% endif %}">
+                                    {{ feedback.get_feedback_type_display }}
+                                </span>
+                            </div>
+                            <p class="mb-1">{{ feedback.message|truncatewords:15 }}</p>
+                            <small class="text-muted">
+                                {{ feedback.to_user.get_full_name }} | {{ feedback.created_at|timesince }} əvvəl
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda göndərilən geri bildirim yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Statistikalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Bu həftə alınan" %}</span>
+                            <strong>{{ stats.weekly_received }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Bu həftə göndərilən" %}</span>
+                            <strong>{{ stats.weekly_sent }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ümumi alınan" %}</span>
+                            <strong>{{ stats.total_received }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ümumi göndərilən" %}</span>
+                            <strong>{{ stats.total_sent }}</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Kateqoriyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for category in categories %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <i class="{{ category.icon }} fa-2x mb-2"></i>
+                                <h6>{{ category.name }}</h6>
+                                <p class="text-muted">{{ category.description|truncatewords:10 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

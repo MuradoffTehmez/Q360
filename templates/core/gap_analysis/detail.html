@@ -1,0 +1,164 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Detallı Gap Analysis" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Detallı Gap Analysis" %}</h2>
+        <p>{% trans "Müəyyən bir dövr üçün detallı fərq analizi." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Kateqoriya Əsasında Fərqlər" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="detailChart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Əsas Məlumatlar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "İstifadəçi" %}</span>
+                            <strong>{{ target_user.get_full_name }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Dövr" %}</span>
+                            <strong>{{ cycle.ad }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ümumi Fərq" %}</span>
+                            <strong>{{ gap_data.overall_gap|floatformat:2 }}</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Kateqoriya Detalları" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Kateqoriya" %}</th>
+                                <th>{% trans "Öz Qiymətiniz" %}</th>
+                                <th>{% trans "Digərlərinin Qiyməti" %}</th>
+                                <th>{% trans "Fərq" %}</th>
+                                <th>{% trans "Tövsiyələr" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in gap_data.categories %}
+                            <tr>
+                                <td>{{ category.category.ad }}</td>
+                                <td>{{ category.self_score|floatformat:1 }}</td>
+                                <td>{{ category.others_score|floatformat:1 }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if category.gap > 0.5 %}bg-warning
+                                        {% elif category.gap < -0.5 %}bg-info
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ category.gap|floatformat:1 }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if category.gap > 1.5 %}
+                                        <span class="text-warning">{% trans "Özünüzü yüksək qiymətləndirirsiniz" %}</span>
+                                    {% elif category.gap < -1.5 %}
+                                        <span class="text-info">{% trans "Özünüzü aşağı qiymətləndirirsiniz" %}</span>
+                                    {% else %}
+                                        <span class="text-muted">{% trans "Dengəli qiymətləndirmə" %}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Tövsiyələr" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    {% for recommendation in recommendations %}
+                    <li>{{ recommendation }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Detail chart
+    const ctx = document.getElementById('detailChart').getContext('2d');
+    const detailChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_data.categories|safe }},
+            datasets: [
+                {
+                    label: '{% trans "Öz Qiymətiniz" %}',
+                    data: {{ chart_data.self_scores|safe }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: '{% trans "Digərlərinin Qiyməti" %}',
+                    data: {{ chart_data.others_scores|safe }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

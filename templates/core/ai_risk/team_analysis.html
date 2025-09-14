@@ -1,0 +1,199 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Komanda Risk Analizi" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Komanda Risk Analizi" %}</h2>
+        <p>{% trans "Şöbə/Departament üzrə performans risklərini analiz edin." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Komanda Üzvləri" %}</h5>
+                <h2>{{ team_risk_data|length }}</h2>
+                <p class="mb-0">{% trans "Ümumi işçi sayı" %}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Ortalama Risk Skoru" %}</h5>
+                <h2>{{ team_average_risk|floatformat:1 }}</h2>
+                <p class="mb-0">{% trans "Komanda ortalaması" %}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Yüksək Riskli İşçilər" %}</h5>
+                <h2>{{ high_risk_count }}</h2>
+                <p class="mb-0">{% trans "Təcili fəaliyyət tələb edən hallar" %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Komanda Üzrə Risk Dağılımı" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="teamRiskChart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Risk Səviyyələri" %}</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="riskLevelChart" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "İşçi Əsasında Risk Analizi" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{% trans "İşçi" %}</th>
+                                <th>{% trans "Risk Skoru" %}</th>
+                                <th>{% trans "Risk Səviyyəsi" %}</th>
+                                <th>{% trans "Aktiv Bayraqlar" %}</th>
+                                <th>{% trans "Əməliyyat" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member in team_risk_data %}
+                            <tr>
+                                <td>{{ member.user_name }}</td>
+                                <td>{{ member.risk_score|floatformat:1 }}</td>
+                                <td>
+                                    <span class="badge bg-{% if member.risk_score < 30 %}success{% elif member.risk_score < 70 %}warning{% else %}danger{% endif %}">
+                                        {% if member.risk_score < 30 %}
+                                            {% trans "Aşağı Risk" %}
+                                        {% elif member.risk_score < 70 %}
+                                            {% trans "Orta Risk" %}
+                                        {% else %}
+                                            {% trans "Yüksək Risk" %}
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>{{ member.active_flags }}</td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-primary">
+                                        {% trans "Detallı Bax" %}
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Tövsiyələr" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>{% trans "Yüksək riskli işçilər üçün fərdi görüşlər təşkil edin" %}</li>
+                    <li>{% trans "İnkişaf planları hazırlayın" %}</li>
+                    <li>{% trans "Müntəzəm olaraq performansı izləyin" %}</li>
+                    <li>{% trans "Komanda üzvlərinin motivasiyasını artırın" %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Team risk chart
+    const teamCtx = document.getElementById('teamRiskChart').getContext('2d');
+    const teamRiskChart = new Chart(teamCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for member in team_risk_data %}"{{ member.user_name }}",{% endfor %}],
+            datasets: [{
+                label: '{% trans "Risk Skoru" %}',
+                data: [{% for member in team_risk_data %}{{ member.risk_score }},{% endfor %}],
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+    
+    // Risk level chart
+    const levelCtx = document.getElementById('riskLevelChart').getContext('2d');
+    const riskLevelChart = new Chart(levelCtx, {
+        type: 'pie',
+        data: {
+            labels: ['{% trans "Aşağı Risk" %}', '{% trans "Orta Risk" %}', '{% trans "Yüksək Risk" %}'],
+            datasets: [{
+                data: [
+                    {% widthratio team_risk_data|length 1 100 %} - {% widthratio high_risk_count 1 100 %},
+                    0,
+                    {% widthratio high_risk_count 1 100 %}
+                ],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(255, 205, 86, 0.2)',
+                    'rgba(255, 99, 132, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+</script>
+{% endblock %}

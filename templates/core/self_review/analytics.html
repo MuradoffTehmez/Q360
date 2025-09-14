@@ -1,0 +1,324 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Öz Qiymətləndirmə Analitikası" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Öz Qiymətləndirmə Analitikası" %}</h2>
+        <p>{% trans "Öz qiymətləndirmələrinizin trendləri və statistikası." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Filtrlər" %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="get">
+                    <div class="mb-3">
+                        <label for="cycle" class="form-label">{% trans "Dövr" %}</label>
+                        <select name="cycle" id="cycle" class="form-select">
+                            <option value="">{% trans "Hamısı" %}</option>
+                            {% for cycle in cycles %}
+                            <option value="{{ cycle.id }}" {% if request.GET.cycle == cycle.id|stringformat:"i" %}selected{% endif %}>
+                                {{ cycle.ad }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="timeframe" class="form-label">{% trans "Zaman aralığı" %}</label>
+                        <select name="timeframe" id="timeframe" class="form-select">
+                            <option value="6months" {% if request.GET.timeframe == '6months' %}selected{% endif %}>
+                                {% trans "Son 6 ay" %}
+                            </option>
+                            <option value="1year" {% if request.GET.timeframe == '1year' %}selected{% endif %}>
+                                {% trans "Son 1 il" %}
+                            </option>
+                            <option value="2years" {% if request.GET.timeframe == '2years' %}selected{% endif %}>
+                                {% trans "Son 2 il" %}
+                            </option>
+                            <option value="all" {% if request.GET.timeframe == 'all' %}selected{% endif %}>
+                                {% trans "Bütün dövrlər" %}
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mb-2">
+                        <i class="fas fa-filter me-1"></i>
+                        {% trans "Filtrlə" %}
+                    </button>
+                    <a href="{% url 'self_review:analytics' %}" class="btn btn-secondary w-100">
+                        <i class="fas fa-times me-1"></i>
+                        {% trans "Təmizlə" %}
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ümumi Statistikalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-white bg-primary">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{% trans "Ümumi" %}</h5>
+                                <h2>{{ stats.total_reviews }}</h2>
+                                <p class="mb-0">{% trans "qiymətləndirmə" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card text-white bg-success">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{% trans "Tamamlanmış" %}</h5>
+                                <h2>{{ stats.completed_reviews }}</h2>
+                                <p class="mb-0">{% trans "qiymətləndirmə" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{% trans "Orta Skor" %}</h5>
+                                <h2>{{ stats.average_score|floatformat:1 }}</h2>
+                                <p class="mb-0">{% trans "ümumi" %}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="card text-white bg-info">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{% trans "Trend" %}</h5>
+                                <h2>
+                                    {% if stats.trend == 'increasing' %}
+                                        <i class="fas fa-arrow-up"></i>
+                                    {% elif stats.trend == 'decreasing' %}
+                                        <i class="fas fa-arrow-down"></i>
+                                    {% else %}
+                                        <i class="fas fa-minus"></i>
+                                    {% endif %}
+                                </h2>
+                                <p class="mb-0">
+                                    {% if stats.trend == 'increasing' %}
+                                        {% trans "Artır" %}
+                                    {% elif stats.trend == 'decreasing' %}
+                                        {% trans "Azalır" %}
+                                    {% else %}
+                                        {% trans "Stabil" %}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Zaman Əsasında Trendlər" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="trendChart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Kateqoriya Əsasında Dağılım" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="categoryChart" style="height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ən Yaxşı Performans Göstərdiyiniz Kateqoriyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if top_categories %}
+                    <div class="list-group">
+                        {% for category in top_categories %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">{{ category.name }}</h6>
+                                <span class="badge bg-success">{{ category.average_score|floatformat:1 }}</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" 
+                                     role="progressbar" 
+                                     style="width: {{ category.average_score|mul:20 }}%" 
+                                     aria-valuenow="{{ category.average_score|mul:20 }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda məlumat yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "İnkişaf Sahələri" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if improvement_areas %}
+                    <div class="list-group">
+                        {% for area in improvement_areas %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">{{ area.name }}</h6>
+                                <span class="badge bg-warning">{{ area.average_score|floatformat:1 }}</span>
+                            </div>
+                            <p class="mb-1 text-muted">{{ area.recommendation }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda məlumat yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Təhlil və Tövsiyələr" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6>{% trans "Performans Trendi" %}</h6>
+                        <p>
+                            {% if stats.trend == 'increasing' %}
+                                {% trans "Performansınız zaman ərzində artır. Bu, özünüzü düzgün qiymətləndirdiyinizi və inkişaf etdiyinizi göstərir." %}
+                            {% elif stats.trend == 'decreasing' %}
+                                {% trans "Performansınız zaman ərzində azalır. Özünüzü qiymətləndirmədə daha dürüst olmağa çalışın və inkişaf planları hazırlayın." %}
+                            {% else %}
+                                {% trans "Performansınız stabildir. Davam etmək üçün əlavə səy göstərin." %}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>{% trans "Tövsiyələr" %}</h6>
+                        <ul>
+                            <li>{% trans "Özünüzü dürüst qiymətləndirin" %}</li>
+                            <li>{% trans "Güclü tərəflərinizi tanımağa davam edin" %}</li>
+                            <li>{% trans "İnkişaf sahələri üzərində işləyin" %}</li>
+                            <li>{% trans "Müntəzəm olaraq özünüzü qiymətləndirin" %}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>{% trans "Növbəti Addımlar" %}</h6>
+                        <ul>
+                            <li>{% trans "Hədəflərinizi qurun" %}</li>
+                            <li>{% trans "İnkişaf planı hazırlayın" %}</li>
+                            <li>{% trans "Müəllimlərinizlə əlaqə saxlayın" %}</li>
+                            <li>{% trans "Davamlı olaraq özünüzü inkişaf etdirin" %}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Trend chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: {{ trend_data.dates|safe }},
+            datasets: [{
+                label: '{% trans "Ortalama Skor" %}',
+                data: {{ trend_data.scores|safe }},
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5
+                }
+            }
+        }
+    });
+    
+    // Category chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryChart = new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ category_data.names|safe }},
+            datasets: [{
+                data: {{ category_data.scores|safe }},
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 205, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+</script>
+{% endblock %}

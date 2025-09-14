@@ -1,0 +1,216 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Geri Bildirim Detalları" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Geri Bildirim Detalları" %}</h2>
+        <p>{% trans "Geri bildirim məzmunu və detalları." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{{ feedback.title }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <div>
+                        {% if feedback.is_anonymous %}
+                            <span class="badge bg-secondary">{% trans "Anonim" %}</span>
+                        {% else %}
+                            <strong>{% trans "Göndərən:" %}</strong> {{ feedback.from_user.get_full_name }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <span class="badge bg-{% if feedback.feedback_type == 'POSITIVE' %}success{% elif feedback.feedback_type == 'NEGATIVE' %}danger{% else %}secondary{% endif %}">
+                            {{ feedback.get_feedback_type_display }}
+                        </span>
+                        <span class="badge bg-{% if feedback.priority == 'LOW' %}success{% elif feedback.priority == 'MEDIUM' %}warning{% elif feedback.priority == 'HIGH' %}danger{% else %}secondary{% endif %}">
+                            {{ feedback.get_priority_display }}
+                        </span>
+                    </div>
+                </div>
+                
+                <p class="mb-3">{{ feedback.message }}</p>
+                
+                <div class="d-flex justify-content-between">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ feedback.created_at|date:"d.m.Y H:i" }}
+                    </small>
+                    <small class="text-muted">
+                        <i class="fas fa-tag me-1"></i>
+                        {{ feedback.category.name }}
+                    </small>
+                </div>
+            </div>
+            <div class="card-footer">
+                {% if not feedback.is_read %}
+                    <button class="btn btn-success btn-sm mark-as-read" data-feedback-id="{{ feedback.id }}">
+                        <i class="fas fa-check me-1"></i>
+                        {% trans "Oxunub" %}
+                    </button>
+                {% endif %}
+                <button class="btn btn-primary btn-sm reply-btn" data-feedback-id="{{ feedback.id }}">
+                    <i class="fas fa-reply me-1"></i>
+                    {% trans "Cavab ver" %}
+                </button>
+                <button class="btn btn-warning btn-sm archive-btn" data-feedback-id="{{ feedback.id }}">
+                    <i class="fas fa-archive me-1"></i>
+                    {% trans "Arxivlə" %}
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Əlaqəli Məlumatlar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>{% trans "Alan:" %}</strong> {{ feedback.to_user.get_full_name }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>{% trans "Status:" %}</strong> 
+                        {% if feedback.is_read %}
+                            <span class="badge bg-success">{% trans "Oxunub" %}</span>
+                        {% else %}
+                            <span class="badge bg-warning">{% trans "Oxunmamış" %}</span>
+                        {% endif %}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>{% trans "Arxiv:" %}</strong> 
+                        {% if feedback.is_archived %}
+                            <span class="badge bg-info">{% trans "Bəli" %}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{% trans "Xeyr" %}</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Əməliyyatlar" %}</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'quick_feedback:inbox' %}" class="btn btn-secondary w-100 mb-2">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    {% trans "Gələnlər qutusuna qayıt" %}
+                </a>
+                <a href="{% url 'quick_feedback:dashboard' %}" class="btn btn-primary w-100">
+                    <i class="fas fa-home me-1"></i>
+                    {% trans "İdarəetmə panelinə qayıt" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reply Modal -->
+<div class="modal fade" id="replyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "Cavab yaz" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="replyForm">
+                    <input type="hidden" id="replyToFeedbackId" value="{{ feedback.id }}">
+                    <div class="mb-3">
+                        <label for="replyMessage" class="form-label">{% trans "Mesaj" %}</label>
+                        <textarea id="replyMessage" class="form-control" rows="4" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% trans "Bağla" %}
+                </button>
+                <button type="button" class="btn btn-primary" id="sendReplyBtn">
+                    {% trans "Göndər" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Mark as read
+    document.querySelector('.mark-as-read').addEventListener('click', function() {
+        const feedbackId = this.getAttribute('data-feedback-id');
+        fetch(`/quick-feedback/mark-read/${feedbackId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    });
+    
+    // Reply button
+    document.querySelector('.reply-btn').addEventListener('click', function() {
+        const feedbackId = this.getAttribute('data-feedback-id');
+        document.getElementById('replyToFeedbackId').value = feedbackId;
+        const replyModal = new bootstrap.Modal(document.getElementById('replyModal'));
+        replyModal.show();
+    });
+    
+    // Send reply
+    document.getElementById('sendReplyBtn').addEventListener('click', function() {
+        const feedbackId = document.getElementById('replyToFeedbackId').value;
+        const message = document.getElementById('replyMessage').value;
+        
+        fetch(`/quick-feedback/reply/${feedbackId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({message: message})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    });
+    
+    // Archive button
+    document.querySelector('.archive-btn').addEventListener('click', function() {
+        const feedbackId = this.getAttribute('data-feedback-id');
+        fetch(`/quick-feedback/archive/${feedbackId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = "{% url 'quick_feedback:inbox' %}";
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,256 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "İdeya Bankı" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "İdeya Bankı" %}</h2>
+        <p>{% trans "İşçilərin ideyalarını paylaşdığı və səs verdiyi forum sistemi." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-lightbulb fa-2x text-warning mb-2"></i>
+                <h5>{% trans "Yeni İdeya" %}</h5>
+                <p class="text-muted">{% trans "Yeni ideya paylaşın" %}</p>
+                <a href="{% url 'idea_bank:create' %}" class="btn btn-warning btn-sm">
+                    {% trans "Paylaş" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-user fa-2x text-primary mb-2"></i>
+                <h5>{% trans "Mənim İdeyalarım" %}</h5>
+                <p class="text-muted">{% trans "Paylaşdığınız ideyalar" %}</p>
+                <a href="{% url 'idea_bank:my_ideas' %}" class="btn btn-primary btn-sm">
+                    {% trans "Bax" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-2x text-success mb-2"></i>
+                <h5>{% trans "Analitika" %}</h5>
+                <p class="text-muted">{% trans "İdeya statistikası" %}</p>
+                <a href="{% url 'idea_bank:analytics' %}" class="btn btn-success btn-sm">
+                    {% trans "Bax" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-crown fa-2x text-info mb-2"></i>
+                <h5>{% trans "Ən Yaxşılar" %}</h5>
+                <p class="text-muted">{% trans "Ən çox səs alan ideyalar" %}</p>
+                <a href="#" class="btn btn-info btn-sm">
+                    {% trans "Bax" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ən Son İdeyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if ideas %}
+                    <div class="list-group">
+                        {% for idea in ideas %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5 class="mb-1">
+                                        <a href="{% url 'idea_bank:detail' idea.id %}">
+                                            {{ idea.basliq }}
+                                        </a>
+                                    </h5>
+                                    <p class="mb-1">{{ idea.description|truncatewords:20 }}</p>
+                                    <small class="text-muted">
+                                        {% trans "Kateqoriya:" %} 
+                                        <span class="badge bg-secondary">{{ idea.category.name }}</span>
+                                        {% trans "Tarix:" %} {{ idea.created_at|date:"d.m.Y H:i" }}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="mb-2">
+                                        <span class="badge bg-{% if idea.status == 'YENI' %}primary{% elif idea.status == 'TESDIQLENMIS' %}success{% elif idea.status == 'TESDIQSIZ' %}danger{% else %}secondary{% endif %}">
+                                            {{ idea.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-success vote-btn" 
+                                                data-idea-id="{{ idea.id }}" 
+                                                data-vote-type="up">
+                                            <i class="fas fa-thumbs-up"></i> {{ idea.upvotes }}
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger vote-btn" 
+                                                data-idea-id="{{ idea.id }}" 
+                                                data-vote-type="down">
+                                            <i class="fas fa-thumbs-down"></i> {{ idea.downvotes }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-lightbulb fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">{% trans "Hazırda ideya yoxdur" %}</h5>
+                        <p class="text-muted">{% trans "İlk ideya sahibi olmaq üçün 'Yeni İdeya' düyməsini basın." %}</p>
+                        <a href="{% url 'idea_bank:create' %}" class="btn btn-warning">
+                            <i class="fas fa-plus me-1"></i>
+                            {% trans "İlk İdeyanı Paylaş" %}
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Kateqoriyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <a href="{% url 'idea_bank:dashboard' %}" 
+                       class="list-group-item list-group-item-action {% if not request.GET.category %}active{% endif %}">
+                        {% trans "Hamısı" %}
+                    </a>
+                    {% for category in categories %}
+                    <a href="?category={{ category.id }}" 
+                       class="list-group-item list-group-item-action {% if request.GET.category == category.id|stringformat:'i' %}active{% endif %}">
+                        <div class="d-flex justify-content-between">
+                            <span>{{ category.name }}</span>
+                            <span class="badge bg-primary rounded-pill">{{ category.idea_count }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Statistikalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ümumi İdeya" %}</span>
+                            <strong>{{ stats.total_ideas }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Təsdiqlənmiş" %}</span>
+                            <strong>{{ stats.approved_ideas }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Bu Ay Əlavə Edilən" %}</span>
+                            <strong>{{ stats.ideas_this_month }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ən Populyar Kateqoriya" %}</span>
+                            <strong>{{ stats.most_popular_category.name|default:"-" }}</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Vote functionality
+    document.querySelectorAll('.vote-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const ideaId = this.getAttribute('data-idea-id');
+            const voteType = this.getAttribute('data-vote-type');
+            
+            fetch(`/idea-bank/vote/${ideaId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({vote_type: voteType})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.error || '{% trans "Səhv baş verdi" %}');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

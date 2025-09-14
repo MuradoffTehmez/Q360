@@ -1,0 +1,120 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Geri Bildirim Göndər" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Yeni Geri Bildirim Göndər" %}</h2>
+        <p>{% trans "Əməkdaşınıza sürətli geri bildirim göndərin." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Geri Bildirim Formu" %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="to_user" class="form-label">{% trans "Geri Bildirim Alan" %}</label>
+                        <select name="to_user" id="to_user" class="form-select" required>
+                            <option value="">{% trans "Seçin..." %}</option>
+                            {% for user in team_members %}
+                            <option value="{{ user.id }}">{{ user.get_full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="category" class="form-label">{% trans "Kateqoriya" %}</label>
+                        <select name="category" id="category" class="form-select" required>
+                            <option value="">{% trans "Seçin..." %}</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="feedback_type" class="form-label">{% trans "Geri Bildirim Tipi" %}</label>
+                        <select name="feedback_type" id="feedback_type" class="form-select" required>
+                            <option value="POSITIVE">{% trans "Müsbət" %}</option>
+                            <option value="NEGATIVE">{% trans "Mənfi" %}</option>
+                            <option value="NEUTRAL">{% trans "Neytral" %}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">{% trans "Prioritet" %}</label>
+                        <select name="priority" id="priority" class="form-select">
+                            <option value="LOW">{% trans "Aşağı" %}</option>
+                            <option value="MEDIUM" selected>{% trans "Orta" %}</option>
+                            <option value="HIGH">{% trans "Yüksək" %}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="title" class="form-label">{% trans "Başlıq" %}</label>
+                        <input type="text" name="title" id="title" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="message" class="form-label">{% trans "Mesaj" %}</label>
+                        <textarea name="message" id="message" class="form-control" rows="5" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="is_anonymous" id="is_anonymous" class="form-check-input">
+                        <label for="is_anonymous" class="form-check-label">{% trans "Anonim olaraq göndər" %}</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        {% trans "Göndər" %}
+                    </button>
+                    <a href="{% url 'quick_feedback:dashboard' %}" class="btn btn-secondary">
+                        {% trans "Ləğv et" %}
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Tövsiyələr" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>{% trans "Geri bildirimi dəqiq və konkret yazın" %}</li>
+                    <li>{% trans "Müsbət və mənfi nöqtələri qeyd edin" %}</li>
+                    <li>{% trans "Həmişə etik qaydalara əməl edin" %}</li>
+                    <li>{% trans "Anonim göndərməkdən çəkinin" %}</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Kateqoriya İconları" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for category in categories %}
+                    <div class="col-6 text-center mb-3">
+                        <i class="{{ category.icon }} fa-2x mb-1"></i>
+                        <p class="mb-0">{{ category.name }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

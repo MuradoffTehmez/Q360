@@ -1,0 +1,247 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Kateqoriya Detalları" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Kateqoriya Detalları" %}</h2>
+        <p>{% trans "Kateqoriya əsasında detallı performans analizi." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Kateqoriyalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for category in categories %}
+                    <a href="?category={{ category.id }}" 
+                       class="list-group-item list-group-item-action {% if request.GET.category == category.id|stringformat:'i' %}active{% endif %}">
+                        <div class="d-flex justify-content-between">
+                            <span>{{ category.ad }}</span>
+                            <span class="badge bg-primary rounded-pill">
+                                {{ category.average_score|floatformat:1 }}
+                            </span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    {% if selected_category %}
+                        {{ selected_category.ad }} - {% trans "Detallı Analiz" %}
+                    {% else %}
+                        {% trans "Kateqoriya Seçin" %}
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if selected_category %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5>{% trans "Ortalama Skor" %}</h5>
+                                    <h2>{{ category_stats.average_score|floatformat:1 }}</h2>
+                                    <p class="text-muted">{{ category_stats.total_evaluations }} {% trans "qiymətləndirmə" %}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5>{% trans "Trend" %}</h5>
+                                    <h2>
+                                        {% if category_stats.trend == 'increasing' %}
+                                            <span class="text-success">{% trans "Artır" %}</span>
+                                        {% elif category_stats.trend == 'decreasing' %}
+                                            <span class="text-danger">{% trans "Azalır" %}</span>
+                                        {% else %}
+                                            <span class="text-muted">{% trans "Stabil" %}</span>
+                                        {% endif %}
+                                    </h2>
+                                    <p class="text-muted">
+                                        {% if category_stats.trend_change > 0 %}
+                                            +{{ category_stats.trend_change|floatformat:1 }}%
+                                        {% elif category_stats.trend_change < 0 %}
+                                            {{ category_stats.trend_change|floatformat:1 }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">{% trans "Zaman Əsasında Trendlər" %}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="trendChart" style="height: 300px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">{% trans "Şöbələr Üzrə Dağılım" %}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="departmentChart" style="height: 250px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">{% trans "Ən Yaxşı Performans Göstərənlər" %}</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if top_performers %}
+                                        <div class="list-group">
+                                            {% for performer in top_performers %}
+                                            <div class="list-group-item">
+                                                <div class="d-flex justify-content-between">
+                                                    <h6 class="mb-1">{{ performer.user.get_full_name }}</h6>
+                                                    <span class="badge bg-success">{{ performer.score|floatformat:1 }}</span>
+                                                </div>
+                                                <p class="mb-1 text-muted">{{ performer.department.name }}</p>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <p class="text-muted">{% trans "Hazırda məlumat yoxdur." %}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">{% trans "Tövsiyələr" %}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <h6>{% trans "İnkişaf Sahələri" %}</h6>
+                                            <ul>
+                                                {% for suggestion in improvement_suggestions %}
+                                                <li>{{ suggestion }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h6>{% trans "Tədbirlər" %}</h6>
+                                            <ul>
+                                                <li>{% trans "Təlimlər təşkil edin" %}</li>
+                                                <li>{% trans "Mentor proqramları hazırlayın" %}</li>
+                                                <li>{% trans "İnkişaf planları hazırlayın" %}</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h6>{% trans "Növbəti Addımlar" %}</h6>
+                                            <ul>
+                                                <li>{% trans "Müntəzəm olaraq qiymətləndirmələr aparın" %}</li>
+                                                <li>{% trans "Geri bildirimləri təhlil edin" %}</li>
+                                                <li>{% trans "İnkişafı izləyin" %}</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">{% trans "Kateqoriya seçin" %}</h5>
+                        <p class="text-muted">{% trans "Detallı analiz üçün soldan bir kateqoriya seçin." %}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    {% if selected_category %}
+    // Trend chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: {{ trend_data.cycles|safe }},
+            datasets: [{
+                label: '{% trans "Ortalama Skor" %}',
+                data: {{ trend_data.scores|safe }},
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5
+                }
+            }
+        }
+    });
+    
+    // Department chart
+    const deptCtx = document.getElementById('departmentChart').getContext('2d');
+    const departmentChart = new Chart(deptCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ department_data.names|safe }},
+            datasets: [{
+                label: '{% trans "Ortalama Skor" %}',
+                data: {{ department_data.scores|safe }},
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5
+                }
+            }
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %}

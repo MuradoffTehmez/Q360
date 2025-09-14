@@ -1,0 +1,162 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Öz Qiymətləndirmələrim" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Öz Qiymətləndirmələrim" %}</h2>
+        <p>{% trans "Özünüzü qiymətləndirdiyiniz dövrlər və nəticələr." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Aktiv Qiymətləndirmə Dövrləri" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if active_cycles %}
+                    <div class="list-group">
+                        {% for cycle in active_cycles %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5 class="mb-1">{{ cycle.ad }}</h5>
+                                    <p class="mb-1">{{ cycle.description|truncatewords:20 }}</p>
+                                    <small class="text-muted">
+                                        {% trans "Başlama tarixi:" %} {{ cycle.bashlama_tarixi|date:"d.m.Y" }} | 
+                                        {% trans "Bitmə tarixi:" %} {{ cycle.bitme_tarixi|date:"d.m.Y" }}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    {% if cycle.user_has_submitted_self_review %}
+                                        <span class="badge bg-success">{% trans "Tamamlandı" %}</span>
+                                        <br>
+                                        <a href="{% url 'self_review:view' cycle.self_review_id %}" class="btn btn-sm btn-primary mt-2">
+                                            {% trans "Nəticələri gör" %}
+                                        </a>
+                                    {% else %}
+                                        <span class="badge bg-warning">{% trans "Gözləyir" %}</span>
+                                        <br>
+                                        <a href="{% url 'self_review:edit' cycle.id %}" class="btn btn-sm btn-success mt-2">
+                                            {% trans "Başla" %}
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">{% trans "Aktiv qiymətləndirmə dövrü yoxdur" %}</h5>
+                        <p class="text-muted">{% trans "Yeni qiymətləndirmə dövrləri açılanda burada görünəcək." %}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Statistikalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Tamamlanmış" %}</span>
+                            <strong>{{ stats.completed_reviews }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Gözləyən" %}</span>
+                            <strong>{{ stats.pending_reviews }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ümumi Ortalama" %}</span>
+                            <strong>{{ stats.average_score|floatformat:1 }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Son Qiymətləndirmə" %}</span>
+                            <strong>{{ stats.last_review_date|date:"d.m.Y"|default:"-" }}</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Tövsiyələr" %</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>{% trans "Özünüzü dürüst qiymətləndirin" %}</li>
+                    <li>{% trans "Nəticələri təhlil edin" %}</li>
+                    <li>{% trans "İnkişaf planı hazırlayın" %}</li>
+                    <li>{% trans "Müəllimlərinizdən dəstək istəyin" %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Əvvəlki Qiymətləndirmələr" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if previous_reviews %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Dövr" %}</th>
+                                    <th>{% trans "Tarix" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Ortalama Skor" %}</th>
+                                    <th>{% trans "Əməliyyat" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for review in previous_reviews %}
+                                <tr>
+                                    <td>{{ review.dovr.ad }}</td>
+                                    <td>{{ review.yaradilma_tarixi|date:"d.m.Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if review.status == 'TAMAMLANDI' %}success{% else %}warning{% endif %}">
+                                            {{ review.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ review.average_score|floatformat:1 }}</td>
+                                    <td>
+                                        <a href="{% url 'self_review:view' review.id %}" class="btn btn-sm btn-primary">
+                                            {% trans "Bax" %}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Əvvəlki qiymətləndirmə yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Komanda Gap Analysis" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Komanda Gap Analysis" %}</h2>
+        <p>{% trans "Şöbə/Departament üzrə fərq analizi." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Komanda Üzrə Fərqlər" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="teamChart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Əsas Statistikalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Komanda Üzvləri" %}</span>
+                            <strong>{{ team_gap_data|length }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Ortalama Fərq" %}</span>
+                            <strong>{{ team_average_gap|floatformat:2 }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Dövr" %}</span>
+                            <strong>{{ cycle.ad }}</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "İşçi Əsasında Fərqlər" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{% trans "İşçi" %}</th>
+                                <th>{% trans "Ümumi Fərq" %}</th>
+                                <th>{% trans "Status" %}</th>
+                                <th>{% trans "Əməliyyat" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member in team_gap_data %}
+                            <tr>
+                                <td>{{ member.user_name }}</td>
+                                <td>{{ member.overall_gap|floatformat:2 }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if member.overall_gap > 0.5 %}bg-warning
+                                        {% elif member.overall_gap < -0.5 %}bg-info
+                                        {% else %}bg-secondary{% endif %}">
+                                        {% if member.overall_gap > 0.5 %}
+                                            {% trans "Yüksək Qiymətləndirmə" %}
+                                        {% elif member.overall_gap < -0.5 %}
+                                            {% trans "Aşağı Qiymətləndirmə" %}
+                                        {% else %}
+                                            {% trans "Dengəli" %}
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'gap_analysis_detail' cycle.id %}?user_id={{ member.user_id }}" 
+                                       class="btn btn-sm btn-primary">
+                                        {% trans "Detallı Bax" %}
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Tövsiyələr" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>{% trans "Komanda üzvlərinin özünü qiymətləndirməsini təşviq edin" %}</li>
+                    <li>{% trans "Geriyə dönük əlaqələri təşkil edin" %}</li>
+                    <li>{% trans "İnkişaf planları hazırlayın" %}</li>
+                    <li>{% trans "Müntəzəm olaraq qiymətləndirmələri yeniləyin" %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Team chart
+    const ctx = document.getElementById('teamChart').getContext('2d');
+    const teamChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ member_names|safe }},
+            datasets: [
+                {
+                    label: '{% trans "Ümumi Fərq" %}',
+                    data: {{ member_gaps|safe }},
+                    backgroundColor: 'rgba(153, 102, 255, 0.5)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

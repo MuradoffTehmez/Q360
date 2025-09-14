@@ -1,0 +1,186 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "AI Risk Analizi Dashboard" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "AI Risk Analizi Dashboard" %}</h2>
+        <p>{% trans "İşçilərin performans risklərini AI vasitəsilə analiz edin." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-{% if user_risk_analysis.risk_level == 'LOW' %}success{% elif user_risk_analysis.risk_level == 'MEDIUM' %}warning{% elif user_risk_analysis.risk_level == 'HIGH' %}danger{% else %}secondary{% endif %}">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Ümumi Risk Skoru" %}</h5>
+                <h2>{{ user_risk_analysis.total_risk_score|floatformat:1 }}</h2>
+                <p class="mb-0">{{ user_risk_analysis.get_risk_level_display }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Aktiv Risk Bayraqları" %}</h5>
+                <h2>{{ active_risk_flags|length }}</h2>
+                <p class="mb-0">{% trans "Həll edilməmiş risklər" %}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Aktiv Dövr" %}</h5>
+                <h2>{{ active_cycle.ad }}</h2>
+                <p class="mb-0">{% trans "Cari qiymətləndirmə dövrü" %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ətraflı Risk Analizi" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if user_risk_analysis %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>{% trans "Performans Riski" %}</h6>
+                            <div class="progress">
+                                <div class="progress-bar bg-{% if user_risk_analysis.performance_risk_score < 30 %}success{% elif user_risk_analysis.performance_risk_score < 70 %}warning{% else %}danger{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ user_risk_analysis.performance_risk_score }}%" 
+                                     aria-valuenow="{{ user_risk_analysis.performance_risk_score }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ user_risk_analysis.performance_risk_score|floatformat:0 }}%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>{% trans "Davamlılıq Riski" %}</h6>
+                            <div class="progress">
+                                <div class="progress-bar bg-{% if user_risk_analysis.consistency_risk_score < 30 %}success{% elif user_risk_analysis.consistency_risk_score < 70 %}warning{% else %}danger{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ user_risk_analysis.consistency_risk_score }}%" 
+                                     aria-valuenow="{{ user_risk_analysis.consistency_risk_score }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ user_risk_analysis.consistency_risk_score|floatformat:0 }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6>{% trans "Peer Feedback Riski" %}</h6>
+                            <div class="progress">
+                                <div class="progress-bar bg-{% if user_risk_analysis.peer_feedback_risk_score < 30 %}success{% elif user_risk_analysis.peer_feedback_risk_score < 70 %}warning{% else %}danger{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ user_risk_analysis.peer_feedback_risk_score }}%" 
+                                     aria-valuenow="{{ user_risk_analysis.peer_feedback_risk_score }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ user_risk_analysis.peer_feedback_risk_score|floatformat:0 }}%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>{% trans "Davranış Riski" %}</h6>
+                            <div class="progress">
+                                <div class="progress-bar bg-{% if user_risk_analysis.behavioral_risk_score < 30 %}success{% elif user_risk_analysis.behavioral_risk_score < 70 %}warning{% else %}danger{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ user_risk_analysis.behavioral_risk_score }}%" 
+                                     aria-valuenow="{{ user_risk_analysis.behavioral_risk_score }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ user_risk_analysis.behavioral_risk_score|floatformat:0 }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <h6>{% trans "AI Tövsiyələri" %}</h6>
+                        <ul>
+                            {% for recommendation in user_risk_analysis.ai_recommendations %}
+                            <li>{{ recommendation }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda risk analizi məlumatı yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Aktiv Risk Bayraqları" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if active_risk_flags %}
+                    <div class="list-group">
+                        {% for flag in active_risk_flags %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">{{ flag.get_flag_type_display }}</h6>
+                                <span class="badge bg-{% if flag.severity == 'LOW' %}success{% elif flag.severity == 'MEDIUM' %}warning{% elif flag.severity == 'HIGH' %}danger{% else %}secondary{% endif %}">
+                                    {{ flag.get_severity_display }}
+                                </span>
+                            </div>
+                            <p class="mb-1">{{ flag.details.description }}</p>
+                            <small class="text-muted">{{ flag.detected_at|timesince }} əvvəl aşkar edilib</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Aktiv risk bayrağı yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Son Psixoloji Anketlər" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_surveys %}
+                    <div class="row">
+                        {% for survey in recent_surveys %}
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ survey.title }}</h5>
+                                    <p class="card-text">{{ survey.get_survey_type_display }}</p>
+                                    <a href="{% url 'ai_risk:psychological_surveys' %}" class="btn btn-primary">
+                                        {% trans "Anketə Başla" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Hazırda aktiv anket yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Gap Analysis Dashboard" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Gap Analysis Dashboard" %}</h2>
+        <p>{% trans "Özünə qiymətləndirmə və digərlərinin qiymətləndirməsi arasındakı fərqləri analiz edin." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ümumi Fərq Analizi" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>{% trans "Ümumi Ortalama Fərq" %}</h6>
+                        <h3>{{ overall_gap|floatformat:2 }}</h3>
+                        <p class="text-muted">
+                            {% if overall_gap_direction == 'positive' %}
+                                {% trans "Özünüzü ortalama olaraq yüksək qiymətləndirirsiniz" %}
+                            {% elif overall_gap_direction == 'negative' %}
+                                {% trans "Özünüzü ortalama olaraq aşağı qiymətləndirirsiniz" %}
+                            {% else %}
+                                {% trans "Özünüzü ortalama olaraq düzgün qiymətləndirirsiniz" %}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>{% trans "Əhəmiyyətli Fərqlər" %}</h6>
+                        <h3>{{ significant_gaps_count }}</h3>
+                        <p class="text-muted">{% trans "Kateqoriya əsasında böyük fərqlər" %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Əsas Statistikalar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Öz Qiymətiniz" %}</span>
+                            <strong>{{ self_average|floatformat:1 }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Digərlərinin Qiyməti" %}</span>
+                            <strong>{{ others_average|floatformat:1 }}</strong>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{% trans "Aktiv Dövr" %}</span>
+                            <strong>{{ active_cycle.ad }}</strong>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Kateqoriya Əsasında Fərqlər" %}</h5>
+            </div>
+            <div class="card-body">
+                <div id="categoryChart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Yüksək Qiymətləndirilmiş Sahələr" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if overestimated_areas %}
+                    <ul class="list-group">
+                        {% for area in overestimated_areas %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>{{ area.category }}</span>
+                                <span class="badge bg-warning">{{ area.gap|floatformat:1 }}</span>
+                            </div>
+                            <small class="text-muted">{{ area.description }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">{% trans "Yüksək qiymətləndirilmiş sahə yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Aşağı Qiymətləndirilmiş Sahələr" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if underestimated_areas %}
+                    <ul class="list-group">
+                        {% for area in underestimated_areas %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>{{ area.category }}</span>
+                                <span class="badge bg-info">{{ area.gap|floatformat:1 }}</span>
+                            </div>
+                            <small class="text-muted">{{ area.description }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">{% trans "Aşağı qiymətləndirilmiş sahə yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Category comparison chart
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    const categoryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ comparison_chart_data.categories|safe }},
+            datasets: [
+                {
+                    label: '{% trans "Öz Qiymətiniz" %}',
+                    data: {{ comparison_chart_data.self_scores|safe }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: '{% trans "Digərlərinin Qiyməti" %}',
+                    data: {{ comparison_chart_data.others_scores|safe }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

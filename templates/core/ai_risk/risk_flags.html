@@ -1,0 +1,225 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Risk Bayraqları" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Risk Bayraqları" %}</h2>
+        <p>{% trans "İşçilərin performansında aşkar edilmiş riskləri izləyin." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Aktiv Bayraqlar" %}</h5>
+                <h2>{{ flag_stats.total_active }}</h2>
+                <p class="mb-0">{% trans "Həll edilməmiş risklər" %}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Həll Edilmiş" %}</h5>
+                <h2>{{ flag_stats.total_resolved }}</h2>
+                <p class="mb-0">{% trans "Həll edilmiş risklər" %}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Ümumi Bayraqlar" %}</h5>
+                <h2>{{ flag_stats.total_active|add:flag_stats.total_resolved }}</h2>
+                <p class="mb-0">{% trans "Bütün risk bayraqları" %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Aktiv Risk Bayraqları" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if active_flags %}
+                    <div class="list-group">
+                        {% for flag in active_flags %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5 class="mb-1">{{ flag.get_flag_type_display }}</h5>
+                                    <p class="mb-1">{{ flag.details.description }}</p>
+                                    <small class="text-muted">
+                                        {{ flag.detected_at|timesince }} əvvəl aşkar edilib | 
+                                        AI Güvən: {{ flag.ai_confidence|floatformat:1 }}%
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-{% if flag.severity == 'LOW' %}success{% elif flag.severity == 'MEDIUM' %}warning{% elif flag.severity == 'HIGH' %}danger{% else %}secondary{% endif %}">
+                                        {{ flag.get_severity_display }}
+                                    </span>
+                                    <br>
+                                    <span class="badge bg-info">
+                                        {{ flag.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#flagModal{{ flag.id }}">
+                                    {% trans "Detallı Bax" %}
+                                </button>
+                                <button class="btn btn-sm btn-success">
+                                    {% trans "Həll Olunub" %}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Modal -->
+                        <div class="modal fade" id="flagModal{{ flag.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">{{ flag.get_flag_type_display }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>{% trans "Təsvir:" %}</strong> {{ flag.details.description }}</p>
+                                        <p><strong>{% trans "AI Güvən:" %}</strong> {{ flag.ai_confidence|floatformat:1 }}%</p>
+                                        <p><strong>{% trans "Risk Skoru:" %}</strong> {{ flag.risk_score|floatformat:1 }}</p>
+                                        <p><strong>{% trans "Aşkar Edildi:" %}</strong> {{ flag.detected_at|date:"d.m.Y H:i" }}</p>
+                                        {% if flag.details.metrics %}
+                                            <h6>{% trans "Ətraflı Metriklər:" %}</h6>
+                                            <ul>
+                                                {% for key, value in flag.details.metrics.items %}
+                                                <li><strong>{{ key }}:</strong> {{ value }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            {% trans "Bağla" %}
+                                        </button>
+                                        <button type="button" class="btn btn-success">
+                                            {% trans "Həll Olunub" %}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Aktiv risk bayrağı yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Risk Statistikası" %}</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="severityChart" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Həll Edilmiş Risk Bayraqları" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if resolved_flags %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Tip" %}</th>
+                                    <th>{% trans "Şiddət" %}</th>
+                                    <th>{% trans "Aşkar Edildi" %}</th>
+                                    <th>{% trans "Həll Edildi" %}</th>
+                                    <th>{% trans "HR Qeydləri" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for flag in resolved_flags %}
+                                <tr>
+                                    <td>{{ flag.get_flag_type_display }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if flag.severity == 'LOW' %}success{% elif flag.severity == 'MEDIUM' %}warning{% elif flag.severity == 'HIGH' %}danger{% else %}secondary{% endif %}">
+                                            {{ flag.get_severity_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ flag.detected_at|date:"d.m.Y" }}</td>
+                                    <td>{{ flag.resolved_at|date:"d.m.Y" }}</td>
+                                    <td>{{ flag.hr_notes|truncatewords:10 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">{% trans "Həll edilmiş risk bayrağı yoxdur." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Severity chart
+    const ctx = document.getElementById('severityChart').getContext('2d');
+    const severityChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['{% trans "Aşağı" %}', '{% trans "Orta" %}', '{% trans "Yüksək" %}'],
+            datasets: [{
+                data: [
+                    {% for item in flag_stats.by_severity %}
+                        {% if item.severity == 'LOW' %}{{ item.count }}{% endif %}
+                    {% endfor %},
+                    {% for item in flag_stats.by_severity %}
+                        {% if item.severity == 'MEDIUM' %}{{ item.count }}{% endif %}
+                    {% endfor %},
+                    {% for item in flag_stats.by_severity %}
+                        {% if item.severity == 'HIGH' %}{{ item.count }}{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(255, 205, 86, 0.2)',
+                    'rgba(255, 99, 132, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,222 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Öz Qiymətləndirmə Nəticələri" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{{ review.dovr.ad }} - {% trans "Öz Qiymətləndirmə Nəticələr" %}</h2>
+        <p>{% trans "Özünüzü qiymətləndirdiyiniz nəticələr və təhlillər." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Ümumi Nəticələr" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="text-center">
+                            <h3>{{ review.average_score|floatformat:1 }}</h3>
+                            <p class="text-muted">{% trans "Ümumi Ortalama Skor" %}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-center">
+                            <h3>{{ review.total_questions }}</h3>
+                            <p class="text-muted">{% trans "Ümumi Suallar" %}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h6>{% trans "Kateqoriya Əsasında Nəticələr" %}</h6>
+                    {% for category in category_results %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>{{ category.name }}</span>
+                            <span>{{ category.average_score|floatformat:1 }}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" 
+                                 role="progressbar" 
+                                 style="width: {{ category.average_score|mul:20 }}%" 
+                                 aria-valuenow="{{ category.average_score|mul:20 }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Əsas Məlumatlar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>{% trans "Dövr:" %}</strong> {{ review.dovr.ad }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>{% trans "Tarix:" %}</strong> {{ review.yaradilma_tarixi|date:"d.m.Y H:i" }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>{% trans "Status:" %}</strong> 
+                        <span class="badge bg-{% if review.status == 'TAMAMLANDI' %}success{% else %}warning{% endif %}">
+                            {{ review.get_status_display }}
+                        </span>
+                    </li>
+                    <li class="list-group-item">
+                        <strong>{% trans "Tamamlanma:" %}</strong> {{ review.completion_percentage|floatformat:0 }}%
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Əməliyyatlar" %}</h5>
+            </div>
+            <div class="card-body">
+                {% if review.status != 'TAMAMLANDI' %}
+                <a href="{% url 'self_review:edit' review.id %}" class="btn btn-primary w-100 mb-2">
+                    <i class="fas fa-edit me-1"></i>
+                    {% trans "Redaktə et" %}
+                </a>
+                {% endif %}
+                <button class="btn btn-success w-100 mb-2" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i>
+                    {% trans "Çap et" %}
+                </button>
+                <a href="{% url 'self_review:dashboard' %}" class="btn btn-secondary w-100">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    {% trans "Geri qayıt" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Detallı Nəticələr" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="resultsAccordion">
+                    {% for category in detailed_results %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ category.id }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ category.id }}">
+                                {{ category.name }} ({{ category.average_score|floatformat:1 }})
+                            </button>
+                        </h2>
+                        <div id="collapse{{ category.id }}" class="accordion-collapse collapse" data-bs-parent="#resultsAccordion">
+                            <div class="accordion-body">
+                                {% for question in category.questions %}
+                                <div class="mb-3 p-3 border rounded">
+                                    <h6>{{ question.text }}</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="badge bg-primary">{{ question.score }}/5</span>
+                                            {% if question.comment %}
+                                            <p class="mt-2 mb-0"><strong>{% trans "Şərh:" %}</strong> {{ question.comment }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">
+                                                {% trans "Cavab tarixi:" %} {{ question.answered_at|date:"d.m.Y H:i" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Təhlil və Tövsiyələr" %}</h5>
+            </div>
+            <div class="card-body">
+                <h6>{% trans "Güc Nöqtələriniz" %}</h6>
+                <ul>
+                    {% for strength in strengths %}
+                    <li>{{ strength }}</li>
+                    {% endfor %}
+                </ul>
+                
+                <h6>{% trans "İnkişaf Sahələri" %}</h6>
+                <ul>
+                    {% for improvement in improvements %}
+                    <li>{{ improvement }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Növbəti Addımlar" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>{% trans "Bu nəticələri təhlil edin" %}</li>
+                    <li>{% trans "Özünüz üçün inkişaf planı hazırlayın" %}</li>
+                    <li>{% trans "Müəlliminizlə görüşün" %}</li>
+                    <li>{% trans "Hədəflərinizi qurun" %}</li>
+                    <li>{% trans "Davamlı olaraq özünüzü qiymətləndirin" %}</li>
+                </ul>
+                
+                <div class="mt-3">
+                    <a href="#" class="btn btn-primary">
+                        <i class="fas fa-tasks me-1"></i>
+                        {% trans "İnkişaf Planı Yarat" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .accordion-button::after {
+        display: none;
+    }
+}
+</style>
+{% endblock %}
