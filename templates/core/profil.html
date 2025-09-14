@@ -1,0 +1,87 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Profil" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "İstifadəçi Profili" %}</h2>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-user fa-3x text-primary mb-3"></i>
+                <h5>{{ user.get_full_name|default:user.username }}</h5>
+                <p class="text-muted">{{ user.email }}</p>
+                <p class="text-muted">{{ user.vezife }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Profil Məlumatları" %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "İstifadəçi adı" %}</label>
+                        <input type="text" class="form-control" value="{{ user.username }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Ad" %}</label>
+                        <input type="text" class="form-control" value="{{ user.first_name }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Soyad" %}</label>
+                        <input type="text" class="form-control" value="{{ user.last_name }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "E-poçt" %}</label>
+                        <input type="email" class="form-control" value="{{ user.email }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Vəzifə" %}</label>
+                        <input type="text" class="form-control" value="{{ user.vezife }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Təşkilat vahidi" %}</label>
+                        <input type="text" class="form-control" value="{{ user.organization_unit.name }}" readonly>
+                    </div>
+                    <button type="button" class="btn btn-primary" disabled>{% trans "Məlumatları yenilə" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Şifrəni dəyiş" %}</h5>
+            </div>
+            <div class="card-body">
+                <a href="#" class="btn btn-warning">{% trans "Şifrəni dəyiş" %}</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "İstifadəçi tənzimləmələri" %}</h5>
+            </div>
+            <div class="card-body">
+                <a href="#" class="btn btn-info">{% trans "Tənzimləmələr" %}</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

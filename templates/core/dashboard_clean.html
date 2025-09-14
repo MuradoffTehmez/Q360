@@ -1,0 +1,82 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "İdarəetmə Paneli" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Xoş gəlmisiniz" %}, {{
+            user.get_full_name|default:user.username }}!</h2>
+        <p>{% trans
+            "Sistemə giriş etdiniz. Aşağıdakı bölmələrdən birini seçə bilərsiniz."
+            %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">{% trans "İnteraktiv Dashboard" %}</h5>
+                <p class="card-text">{% trans
+                    "Performans və statistikaları izləyin." %}</p>
+                <a href="{% url 'interactive_dashboard' %}"
+                    class="btn btn-primary">{% trans "Bax" %}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-alt fa-3x text-success mb-3"></i>
+                <h5 class="card-title">{% trans "Təqvim" %}</h5>
+                <p class="card-text">{% trans
+                    "Qiymətləndirmə dövrləri və hadisələr." %}</p>
+                <a href="{% url 'calendar_view' %}" class="btn btn-success">{%
+                    trans "Bax" %}</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-bell fa-3x text-warning mb-3"></i>
+                <h5 class="card-title">{% trans "Bildirişlər" %}</h5>
+                <p class="card-text">{% trans "Ən son bildirişləri izləyin."
+                    %}</p>
+                <a href="{% url 'notification_center' %}"
+                    class="btn btn-warning">{% trans "Bax" %}</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Sonuncu Qiymətləndirmələr" %}</h5>
+            </div>
+            <div class="card-body">
+                <p>{% trans "Burada sonuncu qiymətləndirmələr siyahısı olacaq."
+                    %}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "İnkişaf Planları" %}</h5>
+            </div>
+            <div class="card-body">
+                <p>{% trans "Burada inkişaf planları siyahısı olacaq." %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

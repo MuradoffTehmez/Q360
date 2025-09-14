@@ -1,0 +1,137 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Bildiriş Tənzimləmələri" %}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>{% trans "Bildiriş Tənzimləmələri" %}</h2>
+        <p>{% trans "Bildirişlərinizi necə qəbul etmək istədiyinizi tənzimləyin." %}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "E-poçt Bildirişləri" %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="email_notifications" checked>
+                        <label class="form-check-label" for="email_notifications">
+                            {% trans "E-poçt bildirişləri" %}
+                        </label>
+                        <small class="form-text text-muted">{% trans "Yeni bildirişlər barədə e-poçt qəbul edin." %}</small>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="email_digest" checked>
+                        <label class="form-check-label" for="email_digest">
+                            {% trans "Gündəlik xülasə" %}
+                        </label>
+                        <small class="form-text text-muted">{% trans "Gündəlik olaraq e-poçt xülasəsi qəbul edin." %}</small>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="email_weekly" checked>
+                        <label class="form-check-label" for="email_weekly">
+                            {% trans "Həftəlik xülasə" %}
+                        </label>
+                        <small class="form-text text-muted">{% trans "Həftəlik olaraq e-poçt xülasəsi qəbul edin." %}</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">{% trans "Yadda saxla" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Bildiriş Növləri" %}</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="type_system" checked>
+                            <label class="form-check-label" for="type_system">
+                                {% trans "Sistem bildirişləri" %}
+                            </label>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="type_performance" checked>
+                            <label class="form-check-label" for="type_performance">
+                                {% trans "Performans bildirişləri" %}
+                            </label>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="type_feedback" checked>
+                            <label class="form-check-label" for="type_feedback">
+                                {% trans "Geri bildirişlər" %}
+                            </label>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="type_calendar" checked>
+                            <label class="form-check-label" for="type_calendar">
+                                {% trans "Təqvim hadisələri" %}
+                            </label>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{% trans "Əlavə Tənzimləmələr" %}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Bildiriş səsi" %}</label>
+                        <select class="form-select">
+                            <option>{% trans "Varsayılan" %}</option>
+                            <option>{% trans "Zəng" %}</option>
+                            <option>{% trans "Xəbərdarlıq" %}</option>
+                            <option>{% trans "Səssiz" %}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{% trans "Bildiriş saatları" %}</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Başlama saatı" %}</label>
+                                <input type="time" class="form-control" value="09:00">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Bitmə saatı" %}</label>
+                                <input type="time" class="form-control" value="18:00">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">{% trans "Yadda saxla" %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

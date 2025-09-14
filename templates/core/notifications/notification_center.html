@@ -129,8 +129,7 @@
                                 <option value="all" {% if current_filter_type == 'all' %}selected{% endif %}>Hamısı
                                 </option>
                                 {% for type_code, type_name in notification_types %}
-                                <option value="{{ type_code }}" {% if current_filter_type == type_code %}selected{% endif
-                                    %}>
+                                <option value="{{ type_code }}" {% if current_filter_type == type_code %}selected{% endif %}>
                                     {{ type_name }}
                                 </option>
                                 {% endfor %}
