@@ -1,87 +1,278 @@
-{% extends 'core/base.html' %}
+{% extends 'layouts/base.html' %}
 {% load i18n %}
+{% load static %}
 
 {% block title %}{% trans "Profil" %}{% endblock %}
 
+{% block extra_head %}
+<style>
+  .profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    object-fit: cover;
+    margin: 0 auto 1rem;
+  }
+  
+  .profile-stats-card {
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+    border: none;
+  }
+  
+  .profile-stats-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: white;
+  }
+  
+  .stat-icon-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .stat-icon-success {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+  
+  .stat-icon-warning {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+  
+  .form-control-plaintext {
+    padding: 0.375rem 0;
+  }
+  
+  .section-title {
+    position: relative;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e1e5eb;
+  }
+  
+  .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 3px;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="profile-header text-center">
+  <h1 class="mb-3">{% trans "İstifadəçi Profili" %}</h1>
+  <p class="mb-0 opacity-75">{% trans "Şəxsi məlumatlarınız və sistem parametrləri" %}</p>
+</div>
+
 <div class="row">
-    <div class="col-12">
-        <h2>{% trans "İstifadəçi Profili" %}</h2>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="fas fa-user fa-3x text-primary mb-3"></i>
-                <h5>{{ user.get_full_name|default:user.username }}</h5>
-                <p class="text-muted">{{ user.email }}</p>
-                <p class="text-muted">{{ user.vezife }}</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">{% trans "Profil Məlumatları" %}</h5>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">{% trans "İstifadəçi adı" %}</label>
-                        <input type="text" class="form-control" value="{{ user.username }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{% trans "Ad" %}</label>
-                        <input type="text" class="form-control" value="{{ user.first_name }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{% trans "Soyad" %}</label>
-                        <input type="text" class="form-control" value="{{ user.last_name }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{% trans "E-poçt" %}</label>
-                        <input type="email" class="form-control" value="{{ user.email }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{% trans "Vəzifə" %}</label>
-                        <input type="text" class="form-control" value="{{ user.vezife }}" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">{% trans "Təşkilat vahidi" %}</label>
-                        <input type="text" class="form-control" value="{{ user.organization_unit.name }}" readonly>
-                    </div>
-                    <button type="button" class="btn btn-primary" disabled>{% trans "Məlumatları yenilə" %}</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">{% trans "Şifrəni dəyiş" %}</h5>
-            </div>
-            <div class="card-body">
-                <a href="#" class="btn btn-warning">{% trans "Şifrəni dəyiş" %}</a>
-            </div>
-        </div>
+  <div class="col-lg-4 mb-4">
+    <div class="card profile-stats-card">
+      <div class="card-body text-center">
+        {% if user.profil_sekli %}
+          <img src="{{ user.profil_sekli.url }}" alt="{% trans 'Profil şəkli' %}" class="profile-avatar">
+        {% else %}
+          <div class="profile-avatar bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3">
+            <i class="bi bi-person-fill fs-1"></i>
+          </div>
+        {% endif %}
+        <h3>{{ user.get_full_name|default:user.username }}</h3>
+        <p class="text-muted mb-3">{{ user.email }}</p>
+        <p class="mb-0">
+          <span class="badge bg-primary">{{ user.vezife }}</span>
+        </p>
+        {% if user.organization_unit %}
+          <p class="text-muted mt-2">{{ user.organization_unit.name }}</p>
+        {% endif %}
+      </div>
     </div>
     
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">{% trans "İstifadəçi tənzimləmələri" %}</h5>
-            </div>
-            <div class="card-body">
-                <a href="#" class="btn btn-info">{% trans "Tənzimləmələr" %}</a>
-            </div>
+    <div class="card profile-stats-card mt-4">
+      <div class="card-body">
+        <h5 class="card-title mb-4">{% trans "İstifadə statistikası" %}</h5>
+        <div class="d-flex align-items-center mb-3">
+          <div class="stat-icon stat-icon-primary me-3">
+            <i class="bi bi-calendar"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">{% trans "Qeydiyyat tarixi" %}</h6>
+            <p class="text-muted mb-0">{{ user.date_joined|date:"d.m.Y" }}</p>
+          </div>
         </div>
+        <div class="d-flex align-items-center mb-3">
+          <div class="stat-icon stat-icon-success me-3">
+            <i class="bi bi-door-open"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">{% trans "Son giriş" %}</h6>
+            <p class="text-muted mb-0">{{ user.last_login|date:"d.m.Y H:i" }}</p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="stat-icon stat-icon-warning me-3">
+            <i class="bi bi-shield"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">{% trans "İstifadəçi rolu" %}</h6>
+            <p class="text-muted mb-0">
+              {% if user.rol == 'ISHCHI' %}
+                {% trans "İşçi" %}
+              {% elif user.rol == 'REHBER' %}
+                {% trans "Rəhbər" %}
+              {% elif user.rol == 'ADMIN' %}
+                {% trans "Administrator" %}
+              {% elif user.is_superuser %}
+                {% trans "Superadministrator" %}
+              {% else %}
+                {{ user.rol }}
+              {% endif %}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+  
+  <div class="col-lg-8">
+    <div class="card profile-stats-card mb-4">
+      <div class="card-body">
+        <h4 class="section-title">{% trans "Şəxsi məlumatlar" %}</h4>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">{% trans "İstifadəçi adı" %}</label>
+            <p class="form-control-plaintext">{{ user.username }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">{% trans "Ad" %}</label>
+            <p class="form-control-plaintext">{{ user.first_name }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">{% trans "Soyad" %}</label>
+            <p class="form-control-plaintext">{{ user.last_name }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">{% trans "E-poçt" %}</label>
+            <p class="form-control-plaintext">{{ user.email }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">{% trans "Vəzifə" %}</label>
+            <p class="form-control-plaintext">{{ user.vezife }}</p>
+          </div>
+          {% if user.organization_unit %}
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-bold">{% trans "Təşkilat vahidi" %}</label>
+            <p class="form-control-plaintext">{{ user.organization_unit.name }}</p>
+          </div>
+          {% endif %}
+        </div>
+        <div class="text-end">
+          <a href="{% url 'profil_redakte' %}" class="btn btn-primary">
+            <i class="bi bi-pencil me-2"></i>{% trans "Məlumatları redaktə et" %}
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6 mb-4">
+        <div class="card profile-stats-card h-100">
+          <div class="card-body">
+            <h4 class="section-title">{% trans "Şifrəni dəyiş" %}</h4>
+            <p class="mb-4">{% trans "Hesabınızın təhlükəsizliyini artırmaq üçün şifrənizi dəyişin." %}</p>
+            <a href="{% url 'password_change' %}" class="btn btn-warning">
+              <i class="bi bi-key me-2"></i>{% trans "Şifrəni dəyiş" %}
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-4">
+        <div class="card profile-stats-card h-100">
+          <div class="card-body">
+            <h4 class="section-title">{% trans "İstifadəçi tənzimləmələri" %}</h4>
+            <p class="mb-4">{% trans "Bildirişlər, dil və digər parametrləri tənzimləyin." %}</p>
+            <a href="{% url 'profil_tenzimlemeleri' %}" class="btn btn-info">
+              <i class="bi bi-gear me-2"></i>{% trans "Tənzimləmələr" %}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card profile-stats-card">
+      <div class="card-body">
+        <h4 class="section-title">{% trans "Hesab əməliyyatları" %}</h4>
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+            <i class="bi bi-trash me-2"></i>{% trans "Hesabı sil" %}
+          </button>
+          <button type="button" class="btn btn-outline-secondary" onclick="exportData()">
+            <i class="bi bi-download me-2"></i>{% trans "Məlumatları ixrac et" %}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteAccountModalLabel">{% trans "Hesabı sil" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' %}"></button>
+      </div>
+      <div class="modal-body">
+        <p>{% trans "Hesabınızı silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz." %}</p>
+        <div class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          {% trans "Bütün məlumatlarınız sistemdən silinəcək." %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Ləğv et" %}</button>
+        <button type="button" class="btn btn-danger">
+          <i class="bi bi-trash me-2"></i>{% trans "Hesabı sil" %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function exportData() {
+    // Show a confirmation dialog
+    if (confirm("{% trans 'Məlumatlarınızı ixrac etmək istədiyinizə əminsiniz?' %}")) {
+      // In a real application, this would trigger a data export
+      alert("{% trans 'Məlumat ixracı başladı. Hazır olduqda e-poçt ünvanınıza göndəriləcək.' %}");
+    }
+  }
+</script>
 {% endblock %}

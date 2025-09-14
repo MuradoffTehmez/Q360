@@ -1,31 +1,147 @@
 {% extends 'layouts/base.html' %}
 {% load crispy_forms_tags %}
 {% load i18n %}
+{% load static %}
 
 {% block title %}{% trans "Giriş" %}{% endblock %}
 
+{% block extra_head %}
+<!-- Custom CSS for login page -->
+<style>
+  .login-wrapper {
+    min-height: calc(100vh - 76px); /* Subtract navbar height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+  }
+  
+  .login-card {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    width: 100%;
+    max-width: 450px;
+    margin-top: 76px; /* Add margin to account for fixed navbar */
+  }
+  
+  .login-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+  }
+  
+  .login-body {
+    padding: 30px;
+    background: white;
+  }
+  
+  .form-control {
+    border-radius: 8px;
+    padding: 12px 15px;
+    border: 1px solid #e1e5eb;
+    transition: all 0.3s;
+  }
+  
+  .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+  
+  .btn-login {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  
+  .btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  }
+  
+  .login-footer {
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e1e5eb;
+  }
+  
+  .login-footer a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .login-footer a:hover {
+    text-decoration: underline;
+  }
+  
+  .alert {
+    border-radius: 8px;
+  }
+  
+  /* Hide navbar on login page */
+  nav.navbar {
+    display: none;
+  }
+  
+  /* Adjust main content padding for login page */
+  main#main-content {
+    padding-top: 0;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-      <div class="card shadow">
-        <div class="card-header bg-primary text-white text-center">
-          <h4 class="mb-0">{% trans "Sistemə Giriş" %}</h4>
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="login-header">
+      <h3 class="mb-0">{% trans "Sistemə Giriş" %}</h3>
+      <p class="mb-0 mt-2 opacity-75">{% trans "Hesabınıza daxil olun" %}</p>
+    </div>
+    
+    <div class="login-body">
+      {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+          {% trans "İstifadəçi adı və ya şifrə yanlışdır. Zəhmət olmasa, yenidən cəhd edin." %}
         </div>
-        <div class="card-body">
-          <form method="post">
-            {% csrf_token %}
-            {{ form|crispy }}
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary">{% trans "Daxil ol" %}</button>
-            </div>
-          </form>
-          
-          <div class="text-center mt-3">
-            <a href="{% url 'password_reset' %}">{% trans "Şifrəni unutmusunuz?" %}</a>
-          </div>
+      {% endif %}
+      
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="{{ form.username.id_for_label }}" class="form-label">{% trans "İstifadəçi adı və ya E-poçt" %}</label>
+          <input type="text" name="username" class="form-control" id="{{ form.username.id_for_label }}" 
+                 placeholder="{% trans 'İstifadəçi adı və ya e-poçt ünvanı' %}" required autofocus>
         </div>
-      </div>
+        
+        <div class="mb-3">
+          <label for="{{ form.password.id_for_label }}" class="form-label">{% trans "Şifrə" %}</label>
+          <input type="password" name="password" class="form-control" id="{{ form.password.id_for_label }}" 
+                 placeholder="{% trans 'Şifrənizi daxil edin' %}" required>
+        </div>
+        
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" name="remember_me" id="id_remember_me">
+          <label class="form-check-label" for="id_remember_me">{% trans "Məni xatırla" %}</label>
+        </div>
+        
+        <div class="d-grid">
+          <button type="submit" class="btn btn-login">{% trans "Daxil ol" %}</button>
+        </div>
+      </form>
+    </div>
+    
+    <div class="login-footer">
+      <a href="{% url 'password_reset' %}">{% trans "Şifrəni unutmusunuz?" %}</a>
+      <span class="mx-2">•</span>
+      <a href="{% url 'qeydiyyat' %}">{% trans "Qeydiyyatdan keçin" %}</a>
     </div>
   </div>
 </div>
