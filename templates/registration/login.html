@@ -1,0 +1,32 @@
+{% extends 'layouts/base.html' %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+
+{% block title %}{% trans "Giriş" %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white text-center">
+          <h4 class="mb-0">{% trans "Sistemə Giriş" %}</h4>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">{% trans "Daxil ol" %}</button>
+            </div>
+          </form>
+          
+          <div class="text-center mt-3">
+            <a href="{% url 'password_reset' %}">{% trans "Şifrəni unutmusunuz?" %}</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

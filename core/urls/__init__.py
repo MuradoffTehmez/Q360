@@ -1,6 +1,7 @@
 # core/urls/__init__.py
 
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
 
 from .. import views
 from .. import notification_views
@@ -10,6 +11,8 @@ from .. import dashboard_views
 
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
+    path("accounts/login/", auth_views.LoginView.as_view(template_name="pages/user/login.html"), name="login"),
+    path("accounts/logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("qeydiyyat/", views.qeydiyyat_sehifesi, name="qeydiyyat"),
     path(
         "qiymetlendir/<int:qiymetlendirme_id>/",

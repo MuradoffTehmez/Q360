@@ -3,13 +3,11 @@ import os
 from pathlib import Path
 
 from django.utils.translation import gettext_lazy as _ # type: ignore
-from dotenv import load_dotenv # type: ignore
+from decouple import config, Csv  # type: ignore
 
 # ===================================================================
 # ƏSAS QURĞULAR VƏ YOLLAR (BASE  CONFIGURATIONS & PATHS)
 # ===================================================================
-
-load_dotenv()  # .env faylını yükləyirik
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # Layihənin əsas direktoriyası
 
@@ -17,16 +15,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent  # Layihənin əsas direktoriy
 # TƏHLÜKƏSİZLİK (SECURITY SETTINGS)
 # ===================================================================
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-DEBUG = (
-    os.getenv("DEBUG", "False").lower() == "true"
-)  # .env faylından DEBUG dəyərini oxuyuruq
-ALLOWED_HOSTS = [
-    "127.0.0.1", 
-    "localhost",
-    # Add your production domain names here
-    # Example: "www.yoursite.az", "api.yoursite.az", "yoursite.az"
-]
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv(), default='127.0.0.1,localhost')
 
 # In production, remove the wildcard (*) and specify only your actual domain names
 # For example:
@@ -112,7 +103,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # GEMINI AI KONFİQURASİYASI (GOOGLE GEMINI AI CONFIGURATION)
 # ===================================================================
 
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 
 
 # ===================================================================
@@ -120,9 +111,13 @@ GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 # ===================================================================
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': config('DB_ENGINE', default='django.db.backends.sqlite3'),
+        'NAME': config('DB_NAME', default=BASE_DIR / 'db.sqlite3'),
+        'USER': config('DB_USER', default=''),
+        'PASSWORD': config('DB_PASSWORD', default=''),
+        'HOST': config('DB_HOST', default=''),
+        'PORT': config('DB_PORT', default=''),
     }
 }
 
@@ -212,8 +207,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # ===================================================================
@@ -318,8 +313,8 @@ TEMPLATES = [
 # CAPTCHA KONFİQURASİYASI
 # ===================================================================
 
-RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_SITE_KEY')
-RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_SECRET_KEY')
+RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_SITE_KEY', default='')
+RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_SECRET_KEY', default='')
 
 # ===================================================================
 # CACHE (MÜVƏQQƏTİ YADDAŞ)
@@ -396,7 +391,7 @@ LOGGING = {
         },
         'django': {
             'handlers': ['general_file', 'console', 'file'],
-            'level': os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            'level': config("DJANGO_LOG_LEVEL", default="INFO"),
             'propagate': True,
         },
         'core': {
@@ -417,7 +412,7 @@ LOGGING = {
 
 # Celery tətbiqi yalnız Redis mövcud olduqda işə salınır
 # Əgər Redis mövcud deyilsə, e-poçt göndərmə sinxron işləyəcək
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
@@ -427,7 +422,7 @@ CELERY_TASK_SOFT_TIME_LIMIT = 60  # Tapşırığın bitirilməsi üçün xəbər
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # Production-da Celery-ni tam aktivləşdir
-CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", "False").lower() == "true"
+CELERY_TASK_ALWAYS_EAGER = config('CELERY_TASK_ALWAYS_EAGER', default=False, cast=bool)
 
 # Celery worker konfiqurasiyası
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
@@ -441,70 +436,6 @@ CELERY_TASK_ROUTES = {
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 CELERY_WORKER_LOG_FORMAT = '[%(asctime)s: %(levelname)s/%(processName)s] %(message)s'
 CELERY_WORKER_TASK_LOG_FORMAT = '[%(asctime)s: %(levelname)s/%(processName)s][%(task_name)s(%(task_id)s)] %(message)s'
-
-# ===================================================================
-# AUDIT LOGGING KONFİQURASİYASI
-# ===================================================================
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-        'audit': {
-            'format': '{asctime} - AUDIT - {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'audit_file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'logs/audit.log',
-            'maxBytes': 1024*1024*15,  # 15MB
-            'backupCount': 10,
-            'formatter': 'audit',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-        'general_file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'logs/general.log',
-            'maxBytes': 1024*1024*15,  # 15MB
-            'backupCount': 5,
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'audit': {
-            'handlers': ['audit_file', 'console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'django': {
-            'handlers': ['general_file', 'console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'core': {
-            'handlers': ['general_file', 'console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
-
-# Logs qovluğunu yaratmaq üçün
-import os
-if not os.path.exists('logs'):
-    os.makedirs('logs')
 
 # ===================================================================
 # DJANGO REST FRAMEWORK KONFİQURASİYASI
@@ -574,20 +505,13 @@ SPECTACULAR_SETTINGS = {
 # ===================================================================
 
 # Development üçün bütün domainlərə icazə ver
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
-]
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv(), default='http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080')
 
 CORS_ALLOW_CREDENTIALS = True
 
 # Production-da daha məhdud konfiqurasiya istifadə edin
 if not DEBUG:
-    CORS_ALLOWED_ORIGINS = [
-        # Production domainlərinizi burada qeyd edin
-    ]
+    CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS_PROD', cast=Csv(), default='')
 
 # ===================================================================
 # 2FA (TWO-FACTOR AUTHENTICATION) KONFİQURASİYASI
@@ -644,7 +568,7 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 # CSRF security
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv(), default='http://127.0.0.1:8000,http://localhost:8000')
 
 # ===================================================================
 # DJANGO MODEL TRANSLATION KONFİQURASİYASI

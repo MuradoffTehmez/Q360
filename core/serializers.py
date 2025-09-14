@@ -8,6 +8,7 @@ from .models import (
     Feedback, Notification, CalendarEvent, QuickFeedback,
     PrivateNote, Idea, IdeaCategory, IdeaComment,
     RiskFlag, EmployeeRiskAnalysis, PsychologicalRiskSurvey, PsychologicalRiskResponse,
+    OrganizationalFeedback,
     # LMS Models
     TrainingCategory, TrainingProgram, TrainingEnrollment, Skill, EmployeeSkill,
     LearningPath, LearningPathProgram
@@ -375,6 +376,23 @@ class StatisticalAnomalySerializer(serializers.Serializer):
     detected_at = serializers.DateTimeField()
     affected_employees = serializers.ListField(child=serializers.IntegerField())
     metrics = serializers.DictField()
+
+
+class OrganizationalFeedbackSerializer(serializers.ModelSerializer):
+    author_name = serializers.CharField(source='author.get_full_name', read_only=True)
+    parent_title = serializers.CharField(source='parent.title', read_only=True, allow_null=True)
+    replies_count = serializers.IntegerField(source='replies.count', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    
+    class Meta:
+        model = OrganizationalFeedback
+        fields = [
+            'id', 'title', 'description', 'author', 'author_name',
+            'category', 'priority', 'status', 'status_display',
+            'parent', 'parent_title', 'replies_count',
+            'is_anonymous', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 # === LMS SERIALIZERS ===
