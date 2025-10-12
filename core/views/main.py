@@ -750,6 +750,20 @@ def activate(request, uidb64, token):
         return redirect("dashboard")
 
 
+@login_required
+def qiymetlendirmeler(request):
+    """İstifadəçinin qiymətləndirmələrini göstərir."""
+    # İstifadəçinin qiymətləndirdiyi və qiymətləndirildiyi bütün qiymətləndirmələri alırıq
+    qiymetlendirmeler = Qiymetlendirme.objects.filter(
+        Q(qiymetlendiren=request.user) | Q(qiymetlendirilen=request.user)
+    ).select_related("qiymetlendirilen", "qiymetlendiren", "dovr").order_by("-dovr__bitme_tarixi")
+
+    context = {
+        "qiymetlendirmeler": qiymetlendirmeler,
+    }
+    return render(request, "core/qiymetlendirmeler.html", context)
+
+
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = "core/profil.html"
 

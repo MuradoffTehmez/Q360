@@ -56,6 +56,9 @@ urlpatterns = [
     path("activate/<uidb64>/<token>/", views.activate, name="activate"),
     path("set-theme/", views.set_theme_preference, name="set_theme_preference"),
     
+    # Qiymətləndirmələr səhifəsi
+    path("qiymetlendirmeler/", views.qiymetlendirmeler, name="qiymetlendirmeler"),
+    
     # === BİLDİRİŞ SİSTEMİ URL-LƏRİ ===
     path("bildirisler/", 
          include([
